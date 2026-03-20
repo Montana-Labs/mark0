@@ -1,30 +1,78 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import type { Product } from "../types/product";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return;
-    fetch(`https://fakestoreapi.com/products/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setProduct(data);
-        setLoading(false);
-      });
+    let isMounted = true;
+
+    const fetchProduct = async () => {
+      if (!id) {
+        if (isMounted) {
+          setError("Product ID is invalid");
+          setLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://fakestoreapi.com/products/${id}`);
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch product");
+        }
+
+        const data: Product = await res.json();
+
+        if (isMounted) {
+          setProduct(data);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : "Unknown error");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchProduct();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
-  if (loading)
+  if (loading) {
     return (
       <div style={{ textAlign: "center", marginTop: "60px", color: "#6b7280" }}>
         Loading...
       </div>
     );
+  }
 
-  if (!product) return <div>Product not found</div>;
+  if (error) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "60px", color: "#ef4444" }}>
+        Error: {error}
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "60px", color: "#6b7280" }}>
+        Product not found
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: "700px", margin: "0 auto" }}>
@@ -38,7 +86,7 @@ export default function ProductDetail() {
           fontWeight: 500,
         }}
       >
-        ← Back to products
+        {"< Back to products"}
       </Link>
       <div
         style={{
@@ -51,6 +99,10 @@ export default function ProductDetail() {
         <img
           src={product.image}
           alt={product.title}
+          width={280}
+          height={280}
+          loading="eager"
+          decoding="async"
           style={{ height: "280px", objectFit: "contain", width: "100%" }}
         />
         <p
@@ -94,6 +146,7 @@ export default function ProductDetail() {
           {product.description}
         </p>
         <button
+          type="button"
           style={{
             marginTop: "28px",
             width: "100%",

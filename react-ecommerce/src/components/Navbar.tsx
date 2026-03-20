@@ -16,11 +16,11 @@ export default function Navbar() {
         style={{
           fontWeight: 700,
           textDecoration: "none",
-          color: "#111",
+          color: "#111827",
           fontSize: "20px",
         }}
       >
-        🛒 ShopReact
+        ShopReact
       </Link>
       <div style={{ marginLeft: "auto", display: "flex", gap: "24px" }}>
         <Link

@@ -13,9 +13,7 @@ export default function Cart() {
           backgroundColor: "#ffffff",
         }}
       >
-        <p style={{ color: "#6b7280", fontSize: "16px" }}>
-          Your cart is empty.
-        </p>
+        <p style={{ color: "#6b7280", fontSize: "16px" }}>Your cart is empty</p>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import type { Product } from "../types/product";
 import ProductCard from "../components/ProductCard";
+import type { Product } from "../types/product";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -8,34 +8,54 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("https://fakestoreapi.com/products")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch");
-        return res.json();
-      })
-      .then((data) => {
-        setProducts(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
+    let isMounted = true;
+
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("https://fakestoreapi.com/products");
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch products");
+        }
+
+        const data: Product[] = await res.json();
+
+        if (isMounted) {
+          setProducts(data);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : "Unknown error");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchProducts();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  if (loading)
+  if (loading) {
     return (
       <div style={{ textAlign: "center", marginTop: "60px", color: "#6b7280" }}>
-        Loading products...
+        Loading...
       </div>
     );
+  }
 
-  if (error)
+  if (error) {
     return (
       <div style={{ textAlign: "center", marginTop: "60px", color: "#ef4444" }}>
         Error: {error}
       </div>
     );
+  }
 
   return (
     <div>

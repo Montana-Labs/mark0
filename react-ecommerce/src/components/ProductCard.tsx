@@ -1,11 +1,16 @@
 import { Link } from "react-router-dom";
-import type { Product } from "../types/product.ts";
+import type { Product } from "../types/product";
 
 interface Props {
   product: Product;
 }
 
 export default function ProductCard({ product }: Props) {
+  const title =
+    product.title.length > 50
+      ? `${product.title.slice(0, 50)}...`
+      : product.title;
+
   return (
     <Link
       to={`/product/${product.id}`}
@@ -24,6 +29,10 @@ export default function ProductCard({ product }: Props) {
         <img
           src={product.image}
           alt={product.title}
+          width={200}
+          height={160}
+          loading="lazy"
+          decoding="async"
           style={{ height: "160px", objectFit: "contain", width: "100%" }}
         />
         <h2
@@ -34,9 +43,7 @@ export default function ProductCard({ product }: Props) {
             lineHeight: "1.4",
           }}
         >
-          {product.title.length > 50
-            ? product.title.substring(0, 50) + "..."
-            : product.title}
+          {title}
         </h2>
         <p
           style={{

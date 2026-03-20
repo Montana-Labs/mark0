@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
@@ -7,7 +7,14 @@ import Cart from "./pages/Cart";
 export default function App() {
   return (
     <BrowserRouter>
-      <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          backgroundColor: "#f9fafb",
+          color: "#111827",
+          fontFamily: "Arial, sans-serif",
+        }}
+      >
         <Navbar />
         <div style={{ padding: "32px", maxWidth: "1200px", margin: "0 auto" }}>
           <Routes>
