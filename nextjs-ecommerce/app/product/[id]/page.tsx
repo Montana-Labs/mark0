@@ -5,15 +5,22 @@ async function getProduct(id: string): Promise<Product> {
   const res = await fetch(`https://fakestoreapi.com/products/${id}`, {
     cache: "no-store",
   });
-  return res.json();
+
+  if (!res.ok) throw new Error("Failed to fetch product");
+
+  const text = await res.text();
+  if (!text) throw new Error("Empty response from API");
+
+  return JSON.parse(text);
 }
 
 export default async function ProductDetail({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const product = await getProduct(params.id);
+  const { id } = await params;
+  const product = await getProduct(id);
 
   return (
     <div style={{ maxWidth: "700px", margin: "0 auto" }}>
