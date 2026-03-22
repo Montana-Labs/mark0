@@ -25,3 +25,7 @@ dist-ssr
 
 .pnpm-store/
 **/.pnpm-store/
+
+# SonarQube
+.scannerwork/
+sonar-project.properties

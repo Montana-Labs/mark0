@@ -43,3 +43,7 @@ next-env.d.ts
 
 .pnpm-store/
 **/.pnpm-store/
+
+# SonarQube
+.scannerwork/
+sonar-project.properties
