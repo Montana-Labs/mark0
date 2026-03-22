@@ -20,7 +20,7 @@ export default function Navbar() {
           fontSize: "20px",
         }}
       >
-        ShopReact
+        mark0
       </Link>
       <div style={{ marginLeft: "auto", display: "flex", gap: "24px" }}>
         <Link

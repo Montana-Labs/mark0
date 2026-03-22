@@ -2,7 +2,8 @@ import Link from "next/link";
 import type { Product } from "@/types/product";
 
 async function getProduct(id: string): Promise<Product> {
-  const res = await fetch(`https://fakestoreapi.com/products/${id}`, {
+  const API_URL = process.env.API_URL || "http://localhost:4000";
+  const res = await fetch(`${API_URL}/products/${id}`, {
     cache: "no-store",
   });
 

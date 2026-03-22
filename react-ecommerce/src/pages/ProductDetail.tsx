@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { Product } from "../types/product";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
@@ -21,7 +23,7 @@ export default function ProductDetail() {
       }
 
       try {
-        const res = await fetch(`https://fakestoreapi.com/products/${id}`);
+        const res = await fetch(`${API_URL}/products/${id}`);
 
         if (!res.ok) {
           throw new Error("Failed to fetch product");

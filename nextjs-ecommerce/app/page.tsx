@@ -2,7 +2,8 @@ import ProductCard from "@/components/ProductCard";
 import type { Product } from "@/types/product";
 
 async function getProducts(): Promise<Product[]> {
-  const res = await fetch("https://fakestoreapi.com/products", {
+  const API_URL = process.env.API_URL || "http://localhost:4000";
+  const res = await fetch(`${API_URL}/products`, {
     cache: "force-cache",
   });
 

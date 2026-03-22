@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import type { Product } from "../types/product";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -12,7 +14,7 @@ export default function Home() {
 
     const fetchProducts = async () => {
       try {
-        const res = await fetch("https://fakestoreapi.com/products");
+        const res = await fetch(`${API_URL}/products`);
 
         if (!res.ok) {
           throw new Error("Failed to fetch products");
