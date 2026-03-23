@@ -19,17 +19,17 @@ export const options = {
       executor: "ramping-vus",
       startVUs: 0,
       stages: [
-        { duration: "30s", target: 100 },   // Warm up: 0 → 100 users
-        { duration: "1m", target: 500 },     // Ramp up: 100 → 500 users
-        { duration: "1m", target: 1000 },    // Peak: 500 → 1000 users
-        { duration: "2m", target: 1000 },    // Sustain: 1000 users selama 2 menit
-        { duration: "30s", target: 0 },      // Cool down
+        { duration: "30s", target: 100 }, // Warm up: 0 → 100 users
+        { duration: "1m", target: 500 }, // Ramp up: 100 → 500 users
+        { duration: "1m", target: 1000 }, // Peak: 500 → 1000 users
+        { duration: "2m", target: 1000 }, // Sustain: 1000 users selama 2 menit
+        { duration: "30s", target: 0 }, // Cool down
       ],
     },
   },
   thresholds: {
-    http_req_duration: ["p(95)<3000"],  // 95% request harus < 3 detik
-    errors: ["rate<0.1"],               // Error rate harus < 10%
+    http_req_duration: ["p(95)<3000"], // 95% request harus < 3 detik
+    errors: ["rate<0.1"], // Error rate harus < 10%
   },
 };
 
