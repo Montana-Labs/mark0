@@ -5,15 +5,38 @@ const app = express();
 const PORT = 4000;
 const FAKESTORE_BASE = "https://fakestoreapi.com";
 
+// ============================================================
+// In-Memory Cache
+// Menjamin data konsisten di setiap request (menjawab keresahan
+// dosen tentang kontrol database state). Setelah fetch pertama
+// dari FakeStoreAPI, data disimpan di memory. Request berikutnya
+// tidak bergantung pada kondisi server FakeStoreAPI.
+// ============================================================
+const cache = new Map<string, { data: unknown; cachedAt: number }>();
+const CACHE_TTL = 1000 * 60 * 60; // 1 jam
+
+async function fetchWithCache(url: string): Promise<unknown> {
+  const now = Date.now();
+  const cached = cache.get(url);
+
+  if (cached && now - cached.cachedAt < CACHE_TTL) {
+    return cached.data;
+  }
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Failed to fetch: ${url}`);
+  const data = await response.json();
+  cache.set(url, { data, cachedAt: now });
+  return data;
+}
+
 app.use(cors());
 app.use(express.json());
 
 // Products endpoints
 app.get("/products", async (_req: Request, res: Response) => {
   try {
-    const response = await fetch(`${FAKESTORE_BASE}/products`);
-    if (!response.ok) throw new Error("Failed to fetch products");
-    const data = await response.json();
+    const data = await fetchWithCache(`${FAKESTORE_BASE}/products`);
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch products" });
@@ -23,11 +46,7 @@ app.get("/products", async (_req: Request, res: Response) => {
 app.get("/products/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const response = await fetch(`${FAKESTORE_BASE}/products/${id}`);
-    if (!response.ok) throw new Error("Failed to fetch product");
-    const text = await response.text();
-    if (!text) throw new Error("Empty response");
-    const data = JSON.parse(text);
+    const data = await fetchWithCache(`${FAKESTORE_BASE}/products/${id}`);
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch product" });
@@ -37,10 +56,9 @@ app.get("/products/:id", async (req: Request, res: Response) => {
 app.get("/products/category/:category", async (req: Request, res: Response) => {
   try {
     const { category } = req.params;
-    const response = await fetch(
+    const data = await fetchWithCache(
       `${FAKESTORE_BASE}/products/category/${category}`,
     );
-    const data = await response.json();
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch by category" });
@@ -49,18 +67,46 @@ app.get("/products/category/:category", async (req: Request, res: Response) => {
 
 app.get("/categories", async (_req: Request, res: Response) => {
   try {
-    const response = await fetch(`${FAKESTORE_BASE}/products/categories`);
-    const data = await response.json();
+    const data = await fetchWithCache(`${FAKESTORE_BASE}/products/categories`);
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
 
+// Cache management endpoints
 app.get("/health", (_req: Request, res: Response) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    cacheSize: cache.size,
+  });
+});
+
+app.post("/cache/clear", (_req: Request, res: Response) => {
+  cache.clear();
+  res.json({ message: "Cache cleared", timestamp: new Date().toISOString() });
+});
+
+app.get("/cache/warmup", async (_req: Request, res: Response) => {
+  try {
+    await fetchWithCache(`${FAKESTORE_BASE}/products`);
+    await fetchWithCache(`${FAKESTORE_BASE}/products/categories`);
+    for (let id = 1; id <= 20; id++) {
+      await fetchWithCache(`${FAKESTORE_BASE}/products/${id}`);
+    }
+    res.json({
+      message: "Cache warmed up",
+      cacheSize: cache.size,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to warm up cache" });
+  }
 });
 
 app.listen(PORT, () => {
   console.log(`Middleware API running on http://localhost:${PORT}`);
+  console.log(`Cache TTL: ${CACHE_TTL / 1000}s`);
 });

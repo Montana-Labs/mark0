@@ -44,6 +44,9 @@ next-env.d.ts
 # Lighthouse reports (generated)
 lighthouse-*.json
 
+# Load testing results (generated)
+load-testing/results-*.json
+
 # Misc
 *.pem
 /coverage
