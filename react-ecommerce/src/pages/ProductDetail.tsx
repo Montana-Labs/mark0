@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { Product } from "../types/product";
+import { addToCart } from "../utils/cart";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
@@ -9,6 +10,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [added, setAdded] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -51,6 +53,13 @@ export default function ProductDetail() {
       isMounted = false;
     };
   }, [id]);
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    addToCart(product);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  };
 
   if (loading) {
     return (
@@ -137,6 +146,14 @@ export default function ProductDetail() {
         >
           ${product.price}
         </p>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
+          <span style={{ color: "#f59e0b", fontSize: "14px" }}>
+            {"★"} {product.rating.rate}
+          </span>
+          <span style={{ color: "#9ca3af", fontSize: "13px" }}>
+            ({product.rating.count} reviews)
+          </span>
+        </div>
         <p
           style={{
             color: "#6b7280",
@@ -149,10 +166,11 @@ export default function ProductDetail() {
         </p>
         <button
           type="button"
+          onClick={handleAddToCart}
           style={{
             marginTop: "28px",
             width: "100%",
-            backgroundColor: "#2563eb",
+            backgroundColor: added ? "#16a34a" : "#2563eb",
             color: "white",
             padding: "14px",
             borderRadius: "8px",
@@ -162,7 +180,7 @@ export default function ProductDetail() {
             fontWeight: 600,
           }}
         >
-          Add to Cart
+          {added ? "Added to Cart!" : "Add to Cart"}
         </button>
       </div>
     </div>

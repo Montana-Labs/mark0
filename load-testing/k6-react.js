@@ -33,7 +33,8 @@ export const options = {
   },
 };
 
-const REACT_URL = "http://localhost:5173";
+// Port 5173 = vite dev, Port 4173 = vite preview (production build)
+const REACT_URL = __ENV.REACT_URL || "http://localhost:4173";
 
 export default function () {
   // 1. Akses Home Page

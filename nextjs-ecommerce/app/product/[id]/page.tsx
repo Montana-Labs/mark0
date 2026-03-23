@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Product } from "@/types/product";
+import AddToCartButton from "@/components/AddToCartButton";
 
 async function getProduct(id: string): Promise<Product> {
   const API_URL = process.env.API_URL || "http://localhost:4000";
@@ -95,6 +96,14 @@ export default async function ProductDetail({
           >
             ${product.price}
           </p>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
+            <span style={{ color: "#f59e0b", fontSize: "14px" }}>
+              {"★"} {product.rating.rate}
+            </span>
+            <span style={{ color: "#9ca3af", fontSize: "13px" }}>
+              ({product.rating.count} reviews)
+            </span>
+          </div>
           <p
             style={{
               color: "#6b7280",
@@ -105,23 +114,7 @@ export default async function ProductDetail({
           >
             {product.description}
           </p>
-          <button
-            type="button"
-            style={{
-              marginTop: "28px",
-              width: "100%",
-              backgroundColor: "#2563eb",
-              color: "white",
-              padding: "14px",
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "16px",
-              fontWeight: 600,
-            }}
-          >
-            Add to Cart
-          </button>
+          <AddToCartButton product={product} />
         </div>
       </div>
     );

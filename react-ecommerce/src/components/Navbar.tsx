@@ -1,6 +1,17 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { getCartCount } from "../utils/cart";
 
 export default function Navbar() {
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    setCartCount(getCartCount());
+    const handleUpdate = () => setCartCount(getCartCount());
+    window.addEventListener("cart-updated", handleUpdate);
+    return () => window.removeEventListener("cart-updated", handleUpdate);
+  }, []);
+
   return (
     <nav
       style={{
@@ -31,9 +42,30 @@ export default function Navbar() {
         </Link>
         <Link
           to="/cart"
-          style={{ textDecoration: "none", color: "#374151", fontWeight: 500 }}
+          style={{
+            textDecoration: "none",
+            color: "#374151",
+            fontWeight: 500,
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+          }}
         >
           Cart
+          {cartCount > 0 && (
+            <span
+              style={{
+                backgroundColor: "#2563eb",
+                color: "#ffffff",
+                fontSize: "11px",
+                fontWeight: 700,
+                padding: "2px 7px",
+                borderRadius: "10px",
+              }}
+            >
+              {cartCount}
+            </span>
+          )}
         </Link>
       </div>
     </nav>
