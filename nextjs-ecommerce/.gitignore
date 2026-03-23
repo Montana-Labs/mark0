@@ -46,4 +46,3 @@ next-env.d.ts
 
 # SonarQube
 .scannerwork/
-sonar-project.properties

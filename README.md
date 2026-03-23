@@ -27,20 +27,47 @@ Penelitian ini membandingkan dua framework berbeda dalam mengembangkan aplikasi 
 - Node.js >= 18.x
 - pnpm (recommended) atau npm
 
-### Step 1: Install Dependencies
+### Step 1: Clone Repository
 
 ```bash
-# Di root folder
-pnpm install --recursive
+git clone https://github.com/Montana-Labs/mark0.git
+cd mark0
 ```
 
-### Step 2: Jalankan API Middleware Terlebih Dahulu
+### Step 2: Setup Environment Variables
 
-Middleware API adalah shared layer yang menjadi sumber data untuk kedua aplikasi.
+Salin file `.env.example` menjadi file `.env` di masing-masing project:
+
+```bash
+# React
+cp react-ecommerce/.env.example react-ecommerce/.env
+
+# Next.js
+cp nextjs-ecommerce/.env.example nextjs-ecommerce/.env.local
+```
+
+### Step 3: Install Dependencies
+
+```bash
+# API Middleware
+cd api-middleware
+pnpm install
+
+# React (di terminal baru)
+cd react-ecommerce
+pnpm install
+
+# Next.js (di terminal baru)
+cd nextjs-ecommerce
+pnpm install
+```
+
+### Step 4: Jalankan API Middleware Terlebih Dahulu
+
+Middleware API **harus jalan duluan** karena kedua aplikasi fetch data dari sini.
 
 ```bash
 cd api-middleware
-pnpm install
 pnpm dev
 ```
 
@@ -50,21 +77,21 @@ Output yang diharapkan:
 Middleware API running on http://localhost:4000
 ```
 
-### Step 3: Jalankan React (CSR) di Terminal Baru
+Verifikasi: buka http://localhost:4000/health di browser, harus muncul `{"status":"ok",...}`
+
+### Step 5: Jalankan React (CSR) di Terminal Baru
 
 ```bash
 cd react-ecommerce
-pnpm install
 pnpm dev
 ```
 
 Akses di: http://localhost:5173
 
-### Step 4: Jalankan Next.js (SSR/SSG) di Terminal Baru
+### Step 6: Jalankan Next.js (SSR/SSG) di Terminal Baru
 
 ```bash
 cd nextjs-ecommerce
-pnpm install
 pnpm dev
 ```
 
@@ -109,18 +136,18 @@ Akses di: http://localhost:3000
 mark0/
 ├── api-middleware/              # Shared API layer
 │   ├── src/
-│   │   └── index.ts            # Express server
+│   │   └── index.ts            # Express server (port 4000)
 │   ├── package.json
 │   ├── tsconfig.json
 │   └── README.md
 │
 ├── react-ecommerce/            # React + Vite (CSR)
 │   ├── src/
-│   │   ├── components/         # Reusable components
-│   │   ├── pages/              # Page components
-│   │   ├── types/              # TypeScript types
-│   │   ├── App.tsx
-│   │   └── main.tsx
+│   │   ├── components/         # Reusable components (Navbar, ProductCard)
+│   │   ├── pages/              # Page components (Home, ProductDetail, Cart)
+│   │   ├── types/              # TypeScript types (Product interface)
+│   │   ├── App.tsx             # Root component + routing
+│   │   └── main.tsx            # Entry point + CSS reset
 │   ├── index.html
 │   ├── package.json
 │   ├── vite.config.ts
@@ -128,25 +155,28 @@ mark0/
 │   ├── .eslintrc.json          # ESLint config (identik dengan Next.js)
 │   ├── sonar-project.properties
 │   ├── vercel.json             # Vercel deployment config
-│   ├── .env                    # Environment variables
+│   ├── .env.example            # Template environment variables
 │   └── README.md
 │
 ├── nextjs-ecommerce/           # Next.js 15 (SSR/SSG)
 │   ├── app/                    # App Router
-│   │   ├── page.tsx            # Home page (SSG)
-│   │   ├── cart/
-│   │   ├── product/
-│   │   └── layout.tsx
-│   ├── components/             # Reusable components
-│   ├── types/                  # TypeScript types
+│   │   ├── page.tsx            # Home page (SSG - cache: force-cache)
+│   │   ├── product/[id]/       # Product detail (SSR - cache: no-store)
+│   │   ├── cart/               # Cart page
+│   │   ├── layout.tsx          # Root layout + Navbar
+│   │   ├── loading.tsx         # Loading fallback
+│   │   └── globals.css         # CSS reset
+│   ├── components/             # Reusable components (Navbar, ProductCard)
+│   ├── types/                  # TypeScript types (Product interface)
 │   ├── next.config.ts
 │   ├── tsconfig.json
 │   ├── .eslintrc.json          # ESLint config (identik dengan React)
 │   ├── sonar-project.properties
 │   ├── vercel.json             # Vercel deployment config
-│   ├── .env.local              # Environment variables
+│   ├── .env.example            # Template environment variables
 │   └── README.md
 │
+├── .gitignore                  # Root gitignore
 ├── AGENT_PROMPT.md             # Instruksi lengkap penelitian
 └── README.md                   # File ini
 ```
@@ -199,16 +229,12 @@ lighthouse http://localhost:3000 --output-path=nextjs-ecommerce/lighthouse-nextj
 
 ## 🔐 Environment Variables
 
+File `.env` tidak di-push ke repository. Gunakan `.env.example` sebagai template.
+
 ### React (`react-ecommerce/.env`)
 
 ```env
 VITE_API_URL=http://localhost:4000
-```
-
-Untuk production dengan Vercel:
-
-```env
-VITE_API_URL=https://api.your-domain.com
 ```
 
 ### Next.js (`nextjs-ecommerce/.env.local`)
@@ -218,11 +244,17 @@ NEXT_PUBLIC_API_URL=http://localhost:4000
 API_URL=http://localhost:4000
 ```
 
-Untuk production dengan Vercel:
+### Production (Vercel)
+
+Set environment variables di Vercel dashboard:
 
 ```env
-NEXT_PUBLIC_API_URL=https://api.your-domain.com
-API_URL=https://api.your-domain.com
+# React
+VITE_API_URL=https://your-middleware-url.com
+
+# Next.js
+NEXT_PUBLIC_API_URL=https://your-middleware-url.com
+API_URL=https://your-middleware-url.com
 ```
 
 ---
@@ -367,6 +399,6 @@ Skripsi - Universitas
 
 ---
 
-**Last Updated:** March 22, 2026
+**Last Updated:** March 23, 2026
 
 Untuk pertanyaan atau issue, silakan buat issue di GitHub repository.

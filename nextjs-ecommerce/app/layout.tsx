@@ -3,7 +3,7 @@ import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ShopNext - SSR/SSG",
+  title: "mark0 - SSR/SSG",
   description: "E-commerce comparison app with SSR and SSG",
 };
 

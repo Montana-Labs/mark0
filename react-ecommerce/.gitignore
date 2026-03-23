@@ -28,4 +28,3 @@ dist-ssr
 
 # SonarQube
 .scannerwork/
-sonar-project.properties
