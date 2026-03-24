@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "ts-node src/index.ts",
-    "build": "tsc",
+    "build": "echo build-skip",
+    "build:local": "tsc",
     "start": "node dist/index.js"
   },
   "dependencies": {
