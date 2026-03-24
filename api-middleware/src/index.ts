@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 
 const app = express();
-const PORT = 4000;
+const PORT = Number(process.env.PORT) || 4000;
 const FAKESTORE_BASE = "https://fakestoreapi.com";
 
 // ============================================================
@@ -107,6 +107,6 @@ app.get("/cache/warmup", async (_req: Request, res: Response) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Middleware API running on http://localhost:${PORT}`);
+  console.log(`Middleware API running on port ${PORT}`);
   console.log(`Cache TTL: ${CACHE_TTL / 1000}s`);
 });
