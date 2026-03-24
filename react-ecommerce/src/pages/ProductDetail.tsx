@@ -3,7 +3,10 @@ import { Link, useParams } from "react-router-dom";
 import type { Product } from "../types/product";
 import { addToCart } from "../utils/cart";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API_URL = import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD
+    ? "https://mark0-middleware.onrender.com"
+    : "http://localhost:4000");
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();

@@ -1,8 +1,13 @@
 import ProductCard from "@/components/ProductCard";
 import type { Product } from "@/types/product";
 
+const DEFAULT_API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://mark0-middleware.onrender.com"
+    : "http://localhost:4000";
+
 async function getProducts(): Promise<Product[]> {
-  const API_URL = process.env.API_URL || "http://localhost:4000";
+  const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
   const res = await fetch(`${API_URL}/products`, {
     cache: "force-cache",
   });

@@ -2,8 +2,13 @@ import Link from "next/link";
 import type { Product } from "@/types/product";
 import AddToCartButton from "@/components/AddToCartButton";
 
+const DEFAULT_API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://mark0-middleware.onrender.com"
+    : "http://localhost:4000";
+
 async function getProduct(id: string): Promise<Product> {
-  const API_URL = process.env.API_URL || "http://localhost:4000";
+  const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
   const res = await fetch(`${API_URL}/products/${id}`, {
     cache: "no-store",
   });

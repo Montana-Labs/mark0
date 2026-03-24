@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import type { Product } from "../types/product";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API_URL = import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD
+    ? "https://mark0-middleware.onrender.com"
+    : "http://localhost:4000");
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
