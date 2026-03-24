@@ -1,6 +1,7 @@
 import express from "express";
 import type { Request, Response } from "express";
 import cors from "cors";
+import fetch from "node-fetch";
 
 const app = express();
 const FAKESTORE_BASE = "https://fakestoreapi.com";
@@ -16,9 +17,9 @@ async function fetchWithCache(url: string): Promise<unknown> {
     return cached.data;
   }
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`Failed to fetch: ${url}`);
-  const data = await response.json();
+  const response = await fetch(url, {});
+  if (!response.ok) throw new Error(`Failed to fetch: ${url} (status: ${response.status})`);
+  const data = (await response.json()) as unknown;
   cache.set(url, { data, cachedAt: now });
   return data;
 }
