@@ -31,7 +31,8 @@ app.get("/products", async (_req: Request, res: Response) => {
     const data = await fetchWithCache(`${FAKESTORE_BASE}/products`);
     res.json(data);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch products" });
+    const message = error instanceof Error ? error.message : "Unknown error";
+    res.status(500).json({ error: "Failed to fetch products", detail: message });
   }
 });
 
