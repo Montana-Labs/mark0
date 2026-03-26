@@ -9,6 +9,7 @@ Saya adalah mahasiswa PSD/UI/UX yang sedang mengerjakan skripsi berjudul:
 Repository: https://github.com/Montana-Labs/mark0
 
 Penelitian membandingkan dua framework:
+
 - `react-ecommerce` → React + Vite + TypeScript (CSR)
 - `nextjs-ecommerce` → Next.js 15 + TypeScript + App Router (SSR + SSG)
 
@@ -19,15 +20,19 @@ Penelitian membandingkan dua framework:
 Dosen saya memiliki beberapa keresahan teknis yang WAJIB dijawab oleh struktur kode:
 
 ### Keresahan 1 — Apple-to-Apple Architecture
+
 Kedua aplikasi HARUS mengakses data dari sumber yang SAMA PERSIS. Saat ini keduanya langsung fetch ke FakeStoreAPI. Dosen meminta ada **shared middleware/API layer** di tengah agar beban servernya identik.
 
 ### Keresahan 2 — Subjektivitas Code Maintainability
+
 Kode harus ditulis dengan **konvensi yang identik** di kedua project agar perbedaan hasil SonarQube mencerminkan perbedaan framework, bukan perbedaan gaya coding developer.
 
 ### Keresahan 3 — Pengukuran UI Rendering yang Akurat
+
 Pengukuran waktu render harus sampai UI benar-benar selesai dimuat (100%), bukan hanya status 200 dari server.
 
 ### Keresahan 4 — Environment Produksi
+
 Dosen mempertanyakan validitas pengujian di localhost. Penelitian perlu diuji di environment yang lebih realistis.
 
 ---
@@ -69,74 +74,78 @@ api-middleware/
 ```
 
 Isi `src/index.ts`:
+
 ```typescript
-import express, { Request, Response } from 'express'
-import cors from 'cors'
+import express, { Request, Response } from "express";
+import cors from "cors";
 
-const app = express()
-const PORT = 4000
-const FAKESTORE_BASE = 'https://fakestoreapi.com'
+const app = express();
+const PORT = 4000;
+const FAKESTORE_BASE = "https://fakestoreapi.com";
 
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 
 // Products endpoints
-app.get('/products', async (_req: Request, res: Response) => {
+app.get("/products", async (_req: Request, res: Response) => {
   try {
-    const response = await fetch(`${FAKESTORE_BASE}/products`)
-    if (!response.ok) throw new Error('Failed to fetch products')
-    const data = await response.json()
-    res.json(data)
+    const response = await fetch(`${FAKESTORE_BASE}/products`);
+    if (!response.ok) throw new Error("Failed to fetch products");
+    const data = await response.json();
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch products' })
+    res.status(500).json({ error: "Failed to fetch products" });
   }
-})
+});
 
-app.get('/products/:id', async (req: Request, res: Response) => {
+app.get("/products/:id", async (req: Request, res: Response) => {
   try {
-    const { id } = req.params
-    const response = await fetch(`${FAKESTORE_BASE}/products/${id}`)
-    if (!response.ok) throw new Error('Failed to fetch product')
-    const text = await response.text()
-    if (!text) throw new Error('Empty response')
-    const data = JSON.parse(text)
-    res.json(data)
+    const { id } = req.params;
+    const response = await fetch(`${FAKESTORE_BASE}/products/${id}`);
+    if (!response.ok) throw new Error("Failed to fetch product");
+    const text = await response.text();
+    if (!text) throw new Error("Empty response");
+    const data = JSON.parse(text);
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch product' })
+    res.status(500).json({ error: "Failed to fetch product" });
   }
-})
+});
 
-app.get('/products/category/:category', async (req: Request, res: Response) => {
+app.get("/products/category/:category", async (req: Request, res: Response) => {
   try {
-    const { category } = req.params
-    const response = await fetch(`${FAKESTORE_BASE}/products/category/${category}`)
-    const data = await response.json()
-    res.json(data)
+    const { category } = req.params;
+    const response = await fetch(
+      `${FAKESTORE_BASE}/products/category/${category}`,
+    );
+    const data = await response.json();
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch by category' })
+    res.status(500).json({ error: "Failed to fetch by category" });
   }
-})
+});
 
-app.get('/categories', async (_req: Request, res: Response) => {
+app.get("/categories", async (_req: Request, res: Response) => {
   try {
-    const response = await fetch(`${FAKESTORE_BASE}/products/categories`)
-    const data = await response.json()
-    res.json(data)
+    const response = await fetch(`${FAKESTORE_BASE}/products/categories`);
+    const data = await response.json();
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch categories' })
+    res.status(500).json({ error: "Failed to fetch categories" });
   }
-})
+});
 
-app.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() })
-})
+app.get("/health", (_req: Request, res: Response) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
 
 app.listen(PORT, () => {
-  console.log(`Middleware API running on http://localhost:${PORT}`)
-})
+  console.log(`Middleware API running on http://localhost:${PORT}`);
+});
 ```
 
 Isi `package.json`:
+
 ```json
 {
   "name": "api-middleware",
@@ -196,11 +205,7 @@ Buat file `.eslintrc.json` yang **IDENTIK PERSIS** di kedua project:
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": [
-    "@typescript-eslint",
-    "react",
-    "react-hooks"
-  ],
+  "plugins": ["@typescript-eslint", "react", "react-hooks"],
   "rules": {
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
@@ -221,11 +226,12 @@ Buat file `.eslintrc.json` yang **IDENTIK PERSIS** di kedua project:
 ```
 
 Install ESLint packages di kedua project:
+
 ```bash
 # Di react-ecommerce
 pnpm add -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-plugin-react eslint-plugin-react-hooks
 
-# Di nextjs-ecommerce  
+# Di nextjs-ecommerce
 pnpm add -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-plugin-react eslint-plugin-react-hooks
 ```
 
@@ -235,21 +241,23 @@ pnpm add -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser es
 
 Pastikan komponen berikut ada dan identik secara logika di KEDUA project:
 
-| Komponen | React | Next.js | Catatan |
-|---|---|---|---|
-| Navbar | src/components/Navbar.tsx | components/Navbar.tsx | Link component berbeda |
-| ProductCard | src/components/ProductCard.tsx | components/ProductCard.tsx | Link component berbeda |
-| Home | src/pages/Home.tsx | app/page.tsx | Fetching pattern berbeda |
-| ProductDetail | src/pages/ProductDetail.tsx | app/product/[id]/page.tsx | Fetching pattern berbeda |
-| Cart | src/pages/Cart.tsx | app/cart/page.tsx | Identik |
-| Types | src/types/product.ts | types/product.ts | HARUS identik |
+| Komponen      | React                          | Next.js                    | Catatan                  |
+| ------------- | ------------------------------ | -------------------------- | ------------------------ |
+| Navbar        | src/components/Navbar.tsx      | components/Navbar.tsx      | Link component berbeda   |
+| ProductCard   | src/components/ProductCard.tsx | components/ProductCard.tsx | Link component berbeda   |
+| Home          | src/pages/Home.tsx             | app/page.tsx               | Fetching pattern berbeda |
+| ProductDetail | src/pages/ProductDetail.tsx    | app/product/[id]/page.tsx  | Fetching pattern berbeda |
+| Cart          | src/pages/Cart.tsx             | app/cart/page.tsx          | Identik                  |
+| Types         | src/types/product.ts           | types/product.ts           | HARUS identik            |
 
 **PENTING:** Yang boleh berbeda HANYA:
+
 - Import statement (Link dari react-router-dom vs next/link)
 - Data fetching pattern (useEffect vs async server component)
 - File routing structure
 
 Yang HARUS sama:
+
 - Interface/types
 - JSX structure dan styling
 - Business logic
@@ -262,6 +270,7 @@ Yang HARUS sama:
 Buat file `sonar-project.properties` di root folder masing-masing project.
 
 **`react-ecommerce/sonar-project.properties`:**
+
 ```properties
 sonar.projectKey=react-ecommerce
 sonar.projectName=React E-Commerce CSR
@@ -274,6 +283,7 @@ sonar.exclusions=node_modules/**,dist/**,**/*.test.ts,**/*.spec.ts
 ```
 
 **`nextjs-ecommerce/sonar-project.properties`:**
+
 ```properties
 sonar.projectKey=nextjs-ecommerce
 sonar.projectName=Next.js E-Commerce SSR/SSG
@@ -294,6 +304,7 @@ sonar.exclusions=node_modules/**,.next/**,**/*.test.ts,**/*.spec.ts
 Buat file konfigurasi deployment untuk keduanya:
 
 **`react-ecommerce/vercel.json`:**
+
 ```json
 {
   "name": "react-ecommerce-csr",
@@ -304,6 +315,7 @@ Buat file konfigurasi deployment untuk keduanya:
 ```
 
 **`nextjs-ecommerce/vercel.json`:**
+
 ```json
 {
   "name": "nextjs-ecommerce-ssr",
@@ -314,26 +326,30 @@ Buat file konfigurasi deployment untuk keduanya:
 Update semua fetch URL agar bisa dikonfigurasi via environment variable:
 
 **`react-ecommerce/.env`:**
+
 ```
 VITE_API_URL=http://localhost:4000
 ```
 
 **`nextjs-ecommerce/.env.local`:**
+
 ```
 NEXT_PUBLIC_API_URL=http://localhost:4000
 API_URL=http://localhost:4000
 ```
 
 Update fetch di React:
+
 ```typescript
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
-fetch(`${API_URL}/products`)
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+fetch(`${API_URL}/products`);
 ```
 
 Update fetch di Next.js:
+
 ```typescript
-const API_URL = process.env.API_URL || 'http://localhost:4000'
-fetch(`${API_URL}/products`, { cache: 'force-cache' })
+const API_URL = process.env.API_URL || "http://localhost:4000";
+fetch(`${API_URL}/products`, { cache: "force-cache" });
 ```
 
 ---
@@ -348,26 +364,33 @@ Update `README.md` di root repository dengan panduan lengkap:
 ## Cara Menjalankan (Development)
 
 ### 1. Jalankan Middleware dulu
+
 cd api-middleware
 pnpm install
 pnpm dev
+
 # Berjalan di http://localhost:4000
 
 ### 2. Jalankan React
+
 cd react-ecommerce
 pnpm install
 pnpm dev
+
 # Berjalan di http://localhost:5173
 
 ### 3. Jalankan Next.js
+
 cd nextjs-ecommerce
 pnpm install
 pnpm dev
+
 # Berjalan di http://localhost:3000
 
 ## Arsitektur
+
 Browser → React (CSR) ──────┐
-                             ├──→ Middleware (localhost:4000) ──→ FakeStoreAPI
+├──→ Middleware (localhost:4000) ──→ FakeStoreAPI
 Browser → Next.js (SSR/SSG) ─┘
 ```
 
@@ -438,3 +461,4 @@ TUGAS 7 - README:
 - Jangan hapus file yang sudah ada, hanya tambah atau ubah
 - Middleware harus berjalan di port 4000 agar tidak bentrok dengan React (5173) dan Next.js (3000)
 - Semua perubahan URL harus menggunakan environment variable, bukan hardcode
+  ererere
