@@ -43,6 +43,7 @@ next-env.d.ts
 
 # Lighthouse reports (generated)
 lighthouse-*.json
+artifacts/
 
 # Load testing results (generated)
 load-testing/results-*.json
