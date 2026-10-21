@@ -5,6 +5,7 @@ interface Props {
   product: Product;
 }
 
+// Card for a single product in the catalog.
 export default function ProductCard({ product }: Props) {
   const title =
     product.title.length > 50
