@@ -1,7 +1,7 @@
 # 📌 Rencana Revisi — Menyelaraskan mark0 dengan Judul Kolokium
 
 > **Dibuat:** 27 Oktober 2026
-> **Status:** belum ada item yang dikerjakan
+> **Status:** P1-6 selesai (commit `7a723b0`, branch `upgrade/patch-deps-okt-2026`). Berikutnya: P0-1/2/3.
 > **Tujuan dokumen:** satu sumber kebenaran tentang apa yang masih harus diperbaiki agar project `mark0` sesuai judul & metodologi di `kolokium.pdf`. Dibaca ulang setiap kali melanjutkan pekerjaan.
 
 **Dokumen pasangan:** `LANGKAH_UPGRADE.md` — runbook perintah upgrade dependency + kebersihan cache (eksekusi P1-6 ada di sana).
@@ -142,7 +142,7 @@ File: `api-middleware/src/index.ts`, `api-middleware/src/data/products.json`
 
 ---
 
-## [ ] P1-6. Selaraskan versi + PATCH kerentanan keamanan
+## [x] ✅ P1-6. Selaraskan versi + PATCH kerentanan keamanan — **SELESAI 27 Okt 2026** (commit `7a723b0`)
 
 > ⚠️ **Diperbarui 27 Okt 2026 setelah audit dependency.** Bagian ini berubah total.
 
@@ -189,16 +189,16 @@ Ini justru **memperkuat** posisi di sidang — menunjukkan kesadaran versi, buka
 
 ### Yang dikerjakan
 
-- [ ] `next` → **16.4.3** (rilis terbaru di line 16.4; 16.4.1 adalah patch minimum. Alternatif kalau mau tetap di 15.x: **15.5.28**, dist-tag `backport`)
-- [ ] `react` / `react-dom` → **TETAP 19.2.4, jangan diupgrade.** Tidak ada advisory, dan versinya **harus identik di kedua app** (variabel terkontrol). Sudah dicek: peer deps `next@16.4.1` menerima `react: ^19.0.0` → aman, tidak ada paksaan bump
-- [ ] `react-router-dom` → **7.18.4** (latest). Alasannya BUKAN demi fairness (Next.js pakai App Router sendiri = variabel bebas), tapi demi **validitas internal**: ganti versi mengubah ukuran bundle, jadi harus dibekukan sebelum ambil data
-- [ ] `express` di middleware → versi ter-patch (`proxy-addr` >= 2.0.8)
+- [x] `next` → **16.4.3** (rilis terbaru di line 16.4; 16.4.1 adalah patch minimum. Alternatif kalau mau tetap di 15.x: **15.5.28**, dist-tag `backport`)
+- [x] `react` / `react-dom` → **TETAP 19.2.4, jangan diupgrade.** Tidak ada advisory, dan versinya **harus identik di kedua app** (variabel terkontrol). Sudah dicek: peer deps `next@16.4.1` menerima `react: ^19.0.0` → aman, tidak ada paksaan bump
+- [x] `react-router-dom` → **7.18.4** (latest). Alasannya BUKAN demi fairness (Next.js pakai App Router sendiri = variabel bebas), tapi demi **validitas internal**: ganti versi mengubah ukuran bundle, jadi harus dibekukan sebelum ambil data
+- [x] `express` di middleware → versi ter-patch (`proxy-addr` >= 2.0.8)
 - [ ] `vite` → 8.1.6+ (opsional; dev-server only, tidak mempengaruhi hasil pengukuran)
 - [ ] ⚠️ **Upgrade KEDUA sisi, jangan cuma Next.js.** Kalau hanya satu sisi dipatch, apple-to-apple-nya rusak
 - [ ] ⚠️ `react-router` versi baru bisa mengubah **ukuran bundle** → berpengaruh ke metrik. Catat ukuran bundle sebelum & sesudah
-- [ ] **Pin versi eksak** (buang `^`) di ketiga `package.json` sebelum ambil data final — demi reproducibility
-- [ ] Setelah upgrade, **verifikasi ulang P0-1** lewat build output: `/ssg` tetap static, `/ssr` tetap dynamic. Perilaku caching berubah antar mayor version
-- [ ] Simpan output `pnpm audit` + tanggalnya sebagai lampiran
+- [x] **Pin versi eksak** (buang `^`) di ketiga `package.json` sebelum ambil data final — demi reproducibility
+- [x] Setelah upgrade, **verifikasi ulang P0-1** lewat build output: `/ssg` tetap static, `/ssr` tetap dynamic. Perilaku caching berubah antar mayor version
+- [x] Simpan output `pnpm audit` + tanggalnya sebagai lampiran
 - [ ] Selaraskan `engines.node`: `HASIL_TESTING.md` catat Node v22.22.1, `api-middleware/package.json` masih `20.x`
 
 ### ⚠️ Urutan itu penting
@@ -259,7 +259,7 @@ Jadi: kode-mu Security Rating A, sementara `next@15.5.14` punya **3 critical RCE
 - [ ] **P2-12.** `scripts/*.ps1` (PowerShell, sisa era Windows) → shell script, karena sekarang di Mac M1
 - [ ] **P2-13b.** **Klaim "ESLint 12 rules 100% identik" perlu diverifikasi.** File `.eslintrc.json` memang identik byte-per-byte, TAPI: (a) ESLint 9 default-nya flat config `eslint.config.js` yang tidak ada di kedua project, (b) plugin yang dirujuk config (`@typescript-eslint/parser`, `eslint-plugin-react`) tidak terpasang di `nextjs-ecommerce`. Jadi identik sebagai *file*, belum tentu benar-benar *dieksekusi* sama. **Tidak mempengaruhi angka SonarQube** (analyzer-nya sendiri, tidak baca eslintrc) — yang perlu diperbaiki hanya klaimnya. Detail di `LANGKAH_UPGRADE.md` §9
 - [ ] **P2-13.** Asimetri kecil: `react-ecommerce` ProductCard punya 1 baris komentar yang tidak ada di versi Next.js. Untuk klaim "konvensi identik", samakan
-- [ ] **P2-14.** `nextjs-ecommerce/.env.example` tidak ada padahal README menyebutnya
+- [x] **P2-14.** `nextjs-ecommerce/.env.example` tidak ada padahal README menyebutnya
 - [ ] **P2-15.** `mark1/` git repo kosong (kandidat Next.js vs Remix yang ditolak) → hapus atau beri README penjelasan
 
 ---
