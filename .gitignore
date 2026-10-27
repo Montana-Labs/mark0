@@ -53,3 +53,12 @@ load-testing/results-*.json
 /coverage
 .pnp
 .pnp.*
+
+# Hasil pengukuran & audit (generated, jangan masuk git)
+results/
+ENVIRONMENT.txt
+audit-before-*.txt
+audit-after-*.txt
+
+# Aset media variasi beban (P0-3) — bisa ratusan MB
+api-middleware/public/media/
