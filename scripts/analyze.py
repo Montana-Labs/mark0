@@ -114,8 +114,9 @@ def run_test(groups, factor_name):
     labels = [l for l, _ in groups]
     arrays = [np.asarray(g, dtype=float) for _, g in groups]
 
-    if all(np.allclose(np.concatenate(arrays), np.concatenate(arrays)[0])):
-        emit(f"    Semua nilai identik di seluruh kelompok — uji tidak bermakna.")
+    pooled = np.concatenate(arrays)
+    if np.allclose(pooled, pooled[0]):
+        emit("    Semua nilai identik di seluruh kelompok — uji tidak bermakna.")
         return
 
     normal, homog, detail, p_lev = check_assumptions(groups)
