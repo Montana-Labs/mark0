@@ -64,3 +64,6 @@ audit-after-*.txt
 # Vercel men-deploy dari git — kalau aset tidak ikut, express.static
 # menyajikan folder kosong dan seluruh eksperimen gagal di produksi.
 # Sekaligus menjamin penguji dapat mereproduksi dengan byte yang sama.
+
+# Virtualenv untuk analisis statistik
+.venv/
