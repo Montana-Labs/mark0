@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+#
+# Runner pengukuran Core Web Vitals untuk skripsi mark0.
+#
+# Menjalankan Lighthouse N kali pada setiap sel (strategi × tier),
+# menyimpan RAW JSON tiap run. Raw per-run wajib disimpan karena tanpa
+# itu tidak ada standar deviasi, dan tanpa standar deviasi tidak ada
+# uji ANOVA / Kruskal-Wallis.
+#
+# Pemakaian:
+#   scripts/run-lighthouse.sh            # 15 run per sel (default)
+#   RUNS=3 scripts/run-lighthouse.sh     # uji coba cepat
+#   PRESET=desktop scripts/run-lighthouse.sh
+#
+# Catatan metodologi:
+#   Tanpa PRESET, Lighthouse memakai default-nya: emulasi perangkat
+#   mobile + throttling jaringan tersimulasi. Default ini yang paling
+#   lazim dikutip di literatur dan harus dinyatakan di Bab 3.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RUNS="${RUNS:-15}"
+PRESET="${PRESET:-}"
+MIDDLEWARE="${MIDDLEWARE:-https://mark0-middleware.vercel.app}"
+OUT="$ROOT/results/raw"
+LOG="$ROOT/results/run.log"
+
+mkdir -p "$OUT"
+: > "$LOG"
+
+if ! command -v lighthouse >/dev/null; then
+  echo "lighthouse belum terpasang. Jalankan: pnpm add -g lighthouse" >&2
+  exit 1
+fi
+
+PRESET_ARG=()
+SUFFIX=""
+if [ -n "$PRESET" ]; then
+  PRESET_ARG=(--preset="$PRESET")
+  SUFFIX="_$PRESET"
+fi
+
+echo "Menghangatkan cache middleware..."
+curl -s -m 120 "$MIDDLEWARE/cache/warmup" >/dev/null || true
+curl -s -m 30 "$MIDDLEWARE/health" | head -c 200; echo
+
+TOTAL=$(grep -vc '^#' "$ROOT/scripts/cells.txt" || true)
+CELL=0
+
+while IFS=$'\t' read -r STRATEGY TIER URL; do
+  case "$STRATEGY" in \#*|"") continue ;; esac
+  CELL=$((CELL + 1))
+  echo
+  echo "=== sel $CELL/$TOTAL — $STRATEGY / $TIER ==="
+  echo "    $URL"
+
+  for i in $(seq 1 "$RUNS"); do
+    FILE="$OUT/${STRATEGY}_${TIER}_$(printf '%02d' "$i")${SUFFIX}.json"
+    printf '    run %2d/%s ' "$i" "$RUNS"
+
+    if lighthouse "$URL" \
+        --only-categories=performance \
+        --output=json \
+        --output-path="$FILE" \
+        --chrome-flags="--headless=new --no-sandbox --disable-extensions" \
+        "${PRESET_ARG[@]}" \
+        --quiet >>"$LOG" 2>&1; then
+      echo "ok"
+    else
+      echo "GAGAL (lihat results/run.log)"
+    fi
+  done
+done < "$ROOT/scripts/cells.txt"
+
+echo
+echo "Selesai. Raw JSON -> results/raw/"
+echo "Langkah berikutnya: python3 scripts/extract-metrics.py"

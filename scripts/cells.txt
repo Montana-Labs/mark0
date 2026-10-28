@@ -1,0 +1,11 @@
+# Daftar 9 sel pengujian: strategi × tier beban media
+# format: strategi<TAB>tier<TAB>url
+csr	light	https://mark0-react-light.vercel.app/
+csr	medium	https://mark0-react-medium.vercel.app/
+csr	heavy	https://mark0-react-heavy.vercel.app/
+ssg	light	https://mark0-next-light.vercel.app/ssg
+ssg	medium	https://mark0-next-medium.vercel.app/ssg
+ssg	heavy	https://mark0-next-heavy.vercel.app/ssg
+ssr	light	https://mark0-next-light.vercel.app/ssr
+ssr	medium	https://mark0-next-medium.vercel.app/ssr
+ssr	heavy	https://mark0-next-heavy.vercel.app/ssr
