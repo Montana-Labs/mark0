@@ -1,7 +1,7 @@
 # 📌 Rencana Revisi — Menyelaraskan mark0 dengan Judul Kolokium
 
 > **Dibuat:** 27 Oktober 2026
-> **Status:** P1-6 ✅ · P0-1 ✅ · P0-2 ✅ · P0-3 🟡 (gambar selesai, video menunggu Keputusan A). Berikutnya: **P0-4 (deploy Vercel sin1)**.
+> **Status:** P1-6 ✅ · P0-1 ✅ · P0-2 ✅ · P0-3 🟡 (gambar ✅, video menunggu Keputusan A) · P0-4 ✅. **Semua P0 beres.** Berikutnya: **P1-5 (runner 9 sel × 15 run + uji statistik)**.
 > **Tujuan dokumen:** satu sumber kebenaran tentang apa yang masih harus diperbaiki agar project `mark0` sesuai judul & metodologi di `kolokium.pdf`. Dibaca ulang setiap kali melanjutkan pekerjaan.
 
 **Dokumen pasangan:** `LANGKAH_UPGRADE.md` — runbook perintah upgrade dependency + kebersihan cache (eksekusi P1-6 ada di sana).
@@ -111,7 +111,7 @@ File: `api-middleware/src/index.ts`, `api-middleware/src/data/products.json`
 
 ---
 
-## [ ] P0-4. Deployment: sekarang MATI, dan bukan di platform yang dijanjikan
+## [x] ✅ P0-4. Deployment — **SELESAI 28 Okt 2026**, 7 project di Vercel sin1 (URL lengkap di `LANGKAH_DEPLOY.md` §9)
 
 **Masalah:**
 - Kode menunjuk ke `https://mark0-middleware.onrender.com` (lihat `nextjs-ecommerce/app/page.tsx`, `react-ecommerce/.env`). **Dites 27 Okt 2026: timeout, tidak ada respons setelah 25 detik.**
@@ -119,14 +119,14 @@ File: `api-middleware/src/index.ts`, `api-middleware/src/data/products.json`
 - Risiko paling serius: kalau middleware di free tier jadi **bottleneck bersama**, hasil load testing tidak lagi mengukur strategi rendering → seluruh perbandingan server-side runtuh.
 
 **Yang dikerjakan:**
-- [ ] Deploy `api-middleware` ke Vercel, region `sin1`
-- [ ] Deploy `react-ecommerce` ke Vercel, region `sin1`
-- [ ] Deploy `nextjs-ecommerce` ke Vercel, region `sin1`
-- [ ] Hapus hardcode Render; semua lewat env var
+- [x] Deploy `api-middleware` ke Vercel, region `sin1`
+- [x] Deploy `react-ecommerce` ke Vercel, region `sin1` (3 project per tier)
+- [x] Deploy `nextjs-ecommerce` ke Vercel, region `sin1` (3 project per tier)
+- [x] Hapus hardcode Render; semua lewat env var level project
 - [ ] `load-testing/k6-nextjs.js` masih hardcode `http://localhost:3000` → ubah ke `__ENV.NEXTJS_URL`
 - [ ] `load-testing/k6-react.js` default `localhost:4173` → arahkan ke URL produksi
-- [ ] Verifikasi: `curl <middleware>/health` balas 200 dengan cepat sebelum ambil data
-- [ ] Catat spesifikasi & region di Bab 3
+- [x] Verifikasi: `/health` 200 + `mediaTiers`; 9 sel cek silang tier semua cocok
+- [x] Catat spesifikasi & region di Bab 3 — `x-vercel-id` mengandung `sin1`
 
 ---
 

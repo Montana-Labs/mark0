@@ -246,16 +246,29 @@ k6 run -e NEXTJS_URL=https://mark0-next-light.vercel.app load-testing/k6-nextjs.
 
 | Sel | URL | Terverifikasi |
 |---|---|---|
-| middleware | `https://mark0-middleware.vercel.app` | ✅ 28 Okt 2026 — media 3 tier https, region sin1 |
-| CSR light | | ⬜ |
-| CSR medium | | ⬜ |
-| CSR heavy | | ⬜ |
-| SSG light | `/ssg` | ⬜ |
-| SSG medium | `/ssg` | ⬜ |
-| SSG heavy | `/ssg` | ⬜ |
-| SSR light | `/ssr` | ⬜ |
-| SSR medium | `/ssr` | ⬜ |
-| SSR heavy | `/ssr` | ⬜ |
+| middleware | `https://mark0-middleware.vercel.app` | ✅ media 3 tier https, region sin1 |
+| CSR light | `https://mark0-react-light.vercel.app` | ✅ tier light ter-bake di bundle |
+| CSR medium | `https://mark0-react-medium.vercel.app` | ✅ tier medium |
+| CSR heavy | `https://mark0-react-heavy.vercel.app` | ✅ tier heavy |
+| SSG light | `https://mark0-next-light.vercel.app/ssg` | ✅ cache HIT, 20 img / 4 eager |
+| SSG medium | `https://mark0-next-medium.vercel.app/ssg` | ✅ cache HIT |
+| SSG heavy | `https://mark0-next-heavy.vercel.app/ssg` | ✅ cache HIT |
+| SSR light | `https://mark0-next-light.vercel.app/ssr` | ✅ cache MISS |
+| SSR medium | `https://mark0-next-medium.vercel.app/ssr` | ✅ cache MISS |
+| SSR heavy | `https://mark0-next-heavy.vercel.app/ssr` | ✅ cache MISS |
+
+**Semua terverifikasi 28 Oktober 2026**, region `sin1`, Deployment Protection tidak aktif (terbukti dari `curl` yang mengembalikan konten, bukan halaman login).
+
+### Bukti untuk Bab 4
+
+`x-vercel-cache` membedakan keduanya secara empiris **di produksi**, bukan cuma di build output:
+
+| Route | `x-vercel-cache` | Arti |
+|---|---|---|
+| `/ssg` | `HIT` | disajikan dari cache statis |
+| `/ssr` | `MISS` | dirender ulang tiap request |
+
+Screenshot header ini bersama tabel route `pnpm build` = bukti validitas strategi rendering.
 
 ---
 
