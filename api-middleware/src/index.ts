@@ -1,3 +1,4 @@
+import path from "path";
 import express, { Request, Response } from "express";
 import cors from "cors";
 import fallbackProducts from "./data/products.json";
@@ -21,6 +22,51 @@ interface Product {
 
 const SNAPSHOT_PRODUCTS = fallbackProducts as Product[];
 const SNAPSHOT_CATEGORIES = [...new Set(SNAPSHOT_PRODUCTS.map((product) => product.category))];
+
+// ============================================================
+// Variasi Beban Media
+// Variabel utama penelitian. Gambar produk di-host sendiri dalam
+// tiga tingkat beban sehingga ukurannya terkontrol penuh, bukan
+// mengikuti ukuran acak dari sumber pihak ketiga.
+//
+// light  :  50-150 KB
+// medium : 200-800 KB
+// heavy  : 1-3 MB
+//
+// Tier dipilih lewat query ?media=<tier>. Aplikasi klien membaca
+// tier dari env var saat build (MEDIA_TIER / VITE_MEDIA_TIER) agar
+// CSR, SSR, dan SSG mendapat perlakuan yang simetris.
+// ============================================================
+const MEDIA_TIERS = ["light", "medium", "heavy"] as const;
+type MediaTier = (typeof MEDIA_TIERS)[number];
+const DEFAULT_MEDIA_TIER: MediaTier = "light";
+
+function resolveTier(raw: unknown): MediaTier {
+  return MEDIA_TIERS.includes(raw as MediaTier)
+    ? (raw as MediaTier)
+    : DEFAULT_MEDIA_TIER;
+}
+
+function mediaBaseUrl(req: Request): string {
+  return process.env.PUBLIC_BASE_URL ?? `${req.protocol}://${req.get("host")}`;
+}
+
+function mediaUrl(productId: number, tier: MediaTier, base: string): string {
+  return `${base}/media/${tier}/img-${String(productId).padStart(2, "0")}.jpg`;
+}
+
+function applyTier(data: unknown, tier: MediaTier, base: string): unknown {
+  if (Array.isArray(data)) {
+    return data.map((item) => applyTier(item, tier, base));
+  }
+
+  if (data && typeof data === "object" && "id" in data && "image" in data) {
+    const product = data as Product;
+    return { ...product, image: mediaUrl(product.id, tier, base) };
+  }
+
+  return data;
+}
 
 // ============================================================
 // In-Memory Cache
@@ -97,11 +143,17 @@ async function fetchWithCache(url: string): Promise<unknown> {
 app.use(cors());
 app.use(express.json());
 
+// Aset media di-host sendiri supaya ukuran byte terkontrol penuh
+app.use(express.static(path.join(__dirname, "..", "public"), {
+  maxAge: "1h",
+}));
+
 // Products endpoints
 app.get("/products", async (_req: Request, res: Response) => {
   try {
     const data = await fetchWithCache(`${FAKESTORE_BASE}/products`);
-    res.json(data);
+    const tier = resolveTier(_req.query.media);
+    res.json(applyTier(data, tier, mediaBaseUrl(_req)));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     console.error("Failed to fetch products:", message);
@@ -119,7 +171,8 @@ app.get("/products/:id", async (req: Request, res: Response) => {
       return;
     }
 
-    res.json(data);
+    const tier = resolveTier(req.query.media);
+    res.json(applyTier(data, tier, mediaBaseUrl(req)));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     console.error(`Failed to fetch product ${req.params.id}:`, message);
@@ -133,7 +186,8 @@ app.get("/products/category/:category", async (req: Request, res: Response) => {
     const data = await fetchWithCache(
       `${FAKESTORE_BASE}/products/category/${category}`,
     );
-    res.json(data);
+    const tier = resolveTier(req.query.media);
+    res.json(applyTier(data, tier, mediaBaseUrl(req)));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     console.error(`Failed to fetch category ${req.params.category}:`, message);
@@ -160,6 +214,8 @@ app.get("/health", (_req: Request, res: Response) => {
     uptime: process.uptime(),
     cacheSize: cache.size,
     snapshotProducts: SNAPSHOT_PRODUCTS.length,
+    mediaTiers: MEDIA_TIERS,
+    defaultMediaTier: DEFAULT_MEDIA_TIER,
   });
 });
 

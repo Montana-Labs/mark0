@@ -1,11 +1,24 @@
 import { useEffect, useState } from "react";
-import ProductCard from "../components/ProductCard";
+import ProductGrid from "../components/ProductGrid";
 import type { Product } from "../types/product";
 
 const API_URL = import.meta.env.VITE_API_URL ||
   (import.meta.env.PROD
     ? "https://mark0-middleware.onrender.com"
     : "http://localhost:4000");
+
+/**
+ * Tier beban media ditentukan saat BUILD lewat env var, bukan lewat
+ * query param saat runtime.
+ *
+ * Alasannya: pada Next.js halaman SSG dibekukan menjadi HTML pada tahap
+ * build sehingga query param tidak berpengaruh di sana. Agar CSR, SSR,
+ * dan SSG mendapat perlakuan yang simetris, ketiganya sama-sama membaca
+ * tier dari env var saat build.
+ *
+ * Konsekuensi: satu build per tier (lihat LANGKAH_UPGRADE.md §7).
+ */
+const MEDIA_TIER = import.meta.env.VITE_MEDIA_TIER || "light";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -17,7 +30,7 @@ export default function Home() {
 
     const fetchProducts = async () => {
       try {
-        const res = await fetch(`${API_URL}/products`);
+        const res = await fetch(`${API_URL}/products?media=${MEDIA_TIER}`);
 
         if (!res.ok) {
           throw new Error("Failed to fetch products");
@@ -62,22 +75,5 @@ export default function Home() {
     );
   }
 
-  return (
-    <div>
-      <h1 style={{ fontSize: "24px", fontWeight: 700, marginBottom: "24px" }}>
-        All Products
-      </h1>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-          gap: "20px",
-        }}
-      >
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
-    </div>
-  );
+  return <ProductGrid products={products} />;
 }

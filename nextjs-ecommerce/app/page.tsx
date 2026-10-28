@@ -1,59 +1,48 @@
-import ProductCard from "@/components/ProductCard";
-import type { Product } from "@/types/product";
+import Link from "next/link";
+import { MEDIA_TIER } from "@/lib/products";
 
-const DEFAULT_API_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://mark0-middleware.onrender.com"
-    : "http://localhost:4000";
+/**
+ * Halaman indeks.
+ *
+ * Katalog produk sengaja TIDAK dirender di sini, melainkan di dua route
+ * terpisah yang isinya identik: /ssg dan /ssr. Pemisahan ini diperlukan
+ * agar SSG dan SSR dapat diukur pada halaman yang sama persis, sehingga
+ * perbedaan hasil pengukuran murni berasal dari strategi rendering.
+ */
+const linkStyle = {
+  display: "block",
+  border: "1px solid #e5e7eb",
+  borderRadius: "12px",
+  padding: "20px",
+  marginBottom: "16px",
+  textDecoration: "none",
+  color: "inherit",
+  backgroundColor: "#ffffff",
+};
 
-async function getProducts(): Promise<Product[]> {
-  const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
-  const res = await fetch(`${API_URL}/products`, {
-    cache: "force-cache",
-  });
+export default function Home() {
+  return (
+    <div>
+      <h1 style={{ fontSize: "24px", fontWeight: 700, marginBottom: "8px" }}>
+        Testbed Strategi Rendering
+      </h1>
+      <p style={{ color: "#6b7280", fontSize: "14px", marginBottom: "24px" }}>
+        Tier beban media aktif: <strong>{MEDIA_TIER}</strong>
+      </p>
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch products");
-  }
+      <Link href="/ssg" style={linkStyle}>
+        <strong style={{ fontSize: "16px" }}>/ssg</strong>
+        <p style={{ color: "#6b7280", fontSize: "13px", marginTop: "4px" }}>
+          Static Site Generation — HTML dibekukan pada tahap build
+        </p>
+      </Link>
 
-  const text = await res.text();
-
-  if (!text) {
-    throw new Error("Empty response from API");
-  }
-
-  return JSON.parse(text) as Product[];
-}
-
-export default async function Home() {
-  try {
-    const products = await getProducts();
-
-    return (
-      <div>
-        <h1 style={{ fontSize: "24px", fontWeight: 700, marginBottom: "24px" }}>
-          All Products
-        </h1>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-            gap: "20px",
-          }}
-        >
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </div>
-    );
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-
-    return (
-      <div style={{ textAlign: "center", marginTop: "60px", color: "#ef4444" }}>
-        Error: {message}
-      </div>
-    );
-  }
+      <Link href="/ssr" style={linkStyle}>
+        <strong style={{ fontSize: "16px" }}>/ssr</strong>
+        <p style={{ color: "#6b7280", fontSize: "13px", marginTop: "4px" }}>
+          Server-Side Rendering — dirender ulang di setiap permintaan
+        </p>
+      </Link>
+    </div>
+  );
 }

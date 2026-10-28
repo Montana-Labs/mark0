@@ -3,10 +3,17 @@ import type { Product } from "../types/product";
 
 interface Props {
   product: Product;
+  /**
+   * Kartu yang berada di atas lipatan layar (above the fold).
+   * Gambarnya dimuat eager + prioritas tinggi karena menjadi kandidat
+   * Largest Contentful Paint. Kalau semua gambar dibiarkan lazy, gambar
+   * di bawah lipatan tidak pernah diunduh saat pengujian, sehingga
+   * variasi beban media tidak terukur.
+   */
+  priority?: boolean;
 }
 
-// Card for a single product in the catalog.
-export default function ProductCard({ product }: Props) {
+export default function ProductCard({ product, priority = false }: Props) {
   const title =
     product.title.length > 50
       ? `${product.title.slice(0, 50)}...`
@@ -32,7 +39,8 @@ export default function ProductCard({ product }: Props) {
           alt={product.title}
           width={200}
           height={160}
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
           decoding="async"
           style={{ height: "160px", objectFit: "contain", width: "100%" }}
         />

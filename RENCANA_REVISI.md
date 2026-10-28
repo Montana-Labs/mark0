@@ -1,7 +1,7 @@
 # 📌 Rencana Revisi — Menyelaraskan mark0 dengan Judul Kolokium
 
 > **Dibuat:** 27 Oktober 2026
-> **Status:** P1-6 selesai (commit `7a723b0`, branch `upgrade/patch-deps-okt-2026`). Berikutnya: P0-1/2/3.
+> **Status:** P1-6 ✅ · P0-1 ✅ · P0-2 ✅ · P0-3 🟡 (gambar selesai, video menunggu Keputusan A). Berikutnya: **P0-4 (deploy Vercel sin1)**.
 > **Tujuan dokumen:** satu sumber kebenaran tentang apa yang masih harus diperbaiki agar project `mark0` sesuai judul & metodologi di `kolokium.pdf`. Dibaca ulang setiap kali melanjutkan pekerjaan.
 
 **Dokumen pasangan:** `LANGKAH_UPGRADE.md` — runbook perintah upgrade dependency + kebersihan cache (eksekusi P1-6 ada di sana).
@@ -38,7 +38,7 @@ Tiap sel dijalankan **15x** Lighthouse → 135 run → raw data per-run disimpan
 
 # 🔴 P0 — Blocking. Tanpa ini skripsi tidak defensible.
 
-## [ ] P0-1. Pisahkan SSR dan SSG ke halaman yang IDENTIK
+## [x] ✅ P0-1. Pisahkan SSR dan SSG ke halaman yang IDENTIK — **SELESAI 28 Okt 2026**
 
 **Masalah:** sekarang SSG diukur di Home (20 gambar), SSR diukur di Product Detail (1 gambar).
 Jadi selisih yang terukur adalah **selisih halaman**, bukan selisih strategi rendering. Rumusan Masalah #1 dan uji ANOVA di bagian 8.3 jadi tidak valid.
@@ -55,7 +55,7 @@ Jadi selisih yang terukur adalah **selisih halaman**, bukan selisih strategi ren
 
 ---
 
-## [ ] P0-2. Matikan lazy-load pada LCP candidate
+## [x] ✅ P0-2. Matikan lazy-load pada LCP candidate — **SELESAI 28 Okt 2026**
 
 **Masalah:** di **kedua** `ProductCard.tsx` semua gambar pakai `loading="lazy"`.
 Akibatnya gambar di bawah fold tidak pernah diunduh saat Lighthouse jalan → **ganti tier media dari 50KB ke 3MB hampir tidak mengubah metrik**. Variabel utama penelitian jadi tidak terukur. Ini juga penyebab LCP aneh di pilot study (14,5s & 18,0s).
@@ -71,7 +71,7 @@ File:
 
 ---
 
-## [ ] P0-3. Implementasi variasi beban media (variabel utama!)
+## [~] 🟡 P0-3. Implementasi variasi beban media — **GAMBAR SELESAI 28 Okt 2026, video menunggu Keputusan A**
 
 **Masalah:** `api-middleware/public/` cuma berisi `.gitkeep`. Gambar masih hotlink ke `fakestoreapi.com/img/...` dengan ukuran apa adanya. **Variabel utama judul baru belum ada wujudnya.**
 
@@ -88,13 +88,23 @@ api-middleware/public/media/
 **Aturan wajib:** ketiga tier harus berasal dari **satu gambar sumber yang sama**, hanya beda resize/kompresi. Kalau isi gambarnya beda, yang terukur bukan cuma ukuran byte.
 
 **Yang dikerjakan:**
-- [ ] Siapkan 20 gambar sumber resolusi tinggi
-- [ ] Generate 3 tier (`sips` / ImageMagick / `ffmpeg` untuk video), catat ukuran aktual tiap file ke tabel
-- [ ] ⚠️ **KOREKSI:** jangan pakai query param `?media=`. Halaman **SSG dibekukan saat build**, jadi query param tidak berpengaruh — hanya jalan untuk CSR dan SSR. Supaya ketiga strategi simetris, tier ditentukan lewat **env var saat build**: `MEDIA_TIER` (Next.js) dan `VITE_MEDIA_TIER` (Vite)
-- [ ] Konsekuensi: **9 build terpisah**, dan `rm -rf .next` wajib antar tier (detail di `LANGKAH_UPGRADE.md` §7)
-- [ ] Middleware rewrite field `image` produk sesuai tier yang diminta
-- [ ] Default tier kalau env kosong: `light` (dan dokumentasikan)
-- [ ] ⚠️ **Jangan commit aset media** ke git (>200 MB). Commit skrip generate-nya + tabel ukuran file
+- [x] Generator dibuat: `scripts/generate-media.py` (Pillow). Satu sumber per produk → 3 tier, pencarian kualitas JPEG otomatis agar masuk rentang target
+- [x] 60 gambar ter-generate, **60/60 masuk rentang**:
+
+  | Tier | Target | Aktual | Rata-rata |
+  |---|---|---|---|
+  | light | 50–150 KB | 97,2 – 103,0 KB | 100,2 KB |
+  | medium | 200–800 KB | 480,6 – 518,0 KB | 490,9 KB |
+  | heavy | 1–3 MB | 2085,5 – 2110,9 KB | 2097,5 KB |
+
+- [x] Ukuran aktual tiap file tercatat di `media-manifest.csv` → bahan tabel Bab 3
+- [ ] ⚠️ **KEPUTUSAN TERBUKA: gambar saat ini SINTETIS, bukan foto produk asli.** Script mendukung sumber asli — taruh `01.jpg`..`20.jpg` di folder `media-source/` lalu jalankan ulang. Kalau tetap sintetis, **wajib dinyatakan di Bab 3** sebagai keterbatasan penelitian
+- [ ] Video: menunggu **Keputusan A**
+- [x] ⚠️ **KOREKSI (sudah diterapkan):** jangan pakai query param `?media=`. Halaman **SSG dibekukan saat build**, jadi query param tidak berpengaruh — hanya jalan untuk CSR dan SSR. Supaya ketiga strategi simetris, tier ditentukan lewat **env var saat build**: `MEDIA_TIER` (Next.js) dan `VITE_MEDIA_TIER` (Vite)
+- [x] Konsekuensi: **9 build terpisah**, dan `rm -rf .next` wajib antar tier (detail di `LANGKAH_UPGRADE.md` §7)
+- [x] Middleware rewrite field `image` produk sesuai tier yang diminta + `express.static` untuk `public/`
+- [x] Default tier kalau env kosong/tidak valid: `light` (terverifikasi)
+- [x] ⚠️ **Jangan commit aset media** ke git (>200 MB). Commit skrip generate-nya + tabel ukuran file
 - [ ] Tabel ukuran file aktual → masuk Bab 3 sebagai bukti tier valid
 
 File: `api-middleware/src/index.ts`, `api-middleware/src/data/products.json`
