@@ -105,46 +105,78 @@ Yang terakhir harus `200` dengan ukuran **~2,1 MB**. Kalau `404`, aset media tid
 
 ---
 
-## §3 Deploy 3 varian React (CSR)
+## §3 ⚠️ Env var HARUS di level project, bukan flag deploy
 
-Env var disuntik langsung lewat flag, bukan lewat dashboard — supaya perintahnya **self-contained dan bisa dilampirkan di skripsi** sebagai bukti reproducibility.
+`vercel link` **otomatis menyambungkan repo GitHub** (terlihat di output:
+`Connecting GitHub repository`). Konsekuensinya berbahaya:
+
+> Kalau tier dikirim lewat `--build-env` saja, sekali kamu `git push`, Vercel
+> akan men-deploy ulang **semua** project dari git **tanpa** flag itu — dan
+> ketujuh project diam-diam kembali ke tier default `light`.
+> Kamu baru sadar setelah data terkumpul dan semua sel ternyata light.
+
+Karena itu tier disimpan sebagai **Environment Variable level project**. Env var
+production berlaku untuk build **dan** runtime, jadi deploy dari CLI maupun dari
+git sama-sama menghasilkan tier yang benar.
+
+Nilai middleware yang dipakai semua app:
+
+```bash
+MW=https://mark0-middleware.vercel.app
+```
+
+---
+
+## §4 Deploy 3 varian React (CSR)
+
+Jalankan **per tier**, satu blok per kali — jangan di-paste berbarengan karena
+`vercel link` punya prompt interaktif.
 
 ```bash
 cd ~/Documents/Developer/skripsi/mark0/react-ecommerce
 MW=https://mark0-middleware.vercel.app
+TIER=light          # ulangi dengan medium, lalu heavy
 
-for TIER in light medium heavy; do
-  vercel link --yes --project mark0-react-$TIER
-  vercel --prod \
-    --build-env VITE_API_URL=$MW \
-    --build-env VITE_MEDIA_TIER=$TIER
-done
+vercel link --yes --project mark0-react-$TIER
+echo "$MW"  | vercel env add VITE_API_URL production
+echo "$TIER" | vercel env add VITE_MEDIA_TIER production
+vercel --prod
 ```
 
-Vite hanya butuh **build-env** — semuanya di-bake ke bundle.
+Vite hanya butuh env saat build — semuanya di-bake ke bundle.
 
 ---
 
-## §4 Deploy 3 varian Next.js (SSG + SSR)
+## §4b Deploy 3 varian Next.js (SSG + SSR)
 
 ```bash
 cd ~/Documents/Developer/skripsi/mark0/nextjs-ecommerce
 MW=https://mark0-middleware.vercel.app
+TIER=light          # ulangi dengan medium, lalu heavy
 
-for TIER in light medium heavy; do
-  vercel link --yes --project mark0-next-$TIER
-  vercel --prod \
-    --build-env API_URL=$MW --build-env MEDIA_TIER=$TIER \
-    --env API_URL=$MW --env MEDIA_TIER=$TIER
-done
+vercel link --yes --project mark0-next-$TIER
+echo "$MW"   | vercel env add API_URL production
+echo "$TIER" | vercel env add MEDIA_TIER production
+vercel --prod
 ```
 
-**Kenapa `--build-env` DAN `--env`:**
+`/ssg` memakai env saat build, `/ssr` memakainya saat request. Env var level
+project production mencakup keduanya, jadi satu kali set sudah cukup.
 
-- `/ssg` di-render saat **build** → butuh `--build-env`
-- `/ssr` di-render saat **request** → butuh `--env` (runtime)
+---
 
-Kalau salah satu lupa dipasang, `/ssr` akan jatuh ke `DEFAULT_API_URL` yang masih menunjuk Render dan **sudah mati** → halaman error.
+## §4c Bersihkan project lama
+
+Ada `mark0-nextjs` dan `mark0-react` dari deploy 7 hari lalu. Keduanya berisi
+kode lama (tanpa route `/ssg` `/ssr`, tanpa variasi media) dan bisa tertukar
+saat pengukuran. Hapus:
+
+```bash
+vercel project rm mark0-nextjs
+vercel project rm mark0-react
+```
+
+Ketik sendiri nama project saat diminta konfirmasi.
 
 ---
 
@@ -214,7 +246,7 @@ k6 run -e NEXTJS_URL=https://mark0-next-light.vercel.app load-testing/k6-nextjs.
 
 | Sel | URL | Terverifikasi |
 |---|---|---|
-| middleware | | ⬜ |
+| middleware | `https://mark0-middleware.vercel.app` | ✅ 28 Okt 2026 — media 3 tier https, region sin1 |
 | CSR light | | ⬜ |
 | CSR medium | | ⬜ |
 | CSR heavy | | ⬜ |
