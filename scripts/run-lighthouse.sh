@@ -64,10 +64,13 @@ echo "Browser : $CHROME_PATH"
 echo "Versi   : $("$CHROME_PATH" --version 2>/dev/null | head -1)"
 echo "Run     : $RUNS per sel"
 
-PRESET_ARG=()
+# macOS memakai bash 3.2, di mana "${arr[@]}" pada array KOSONG memicu
+# "unbound variable" karena set -u. Karena itu array selalu diisi minimal
+# satu elemen (--quiet) supaya tidak pernah kosong.
+LH_ARGS=(--quiet)
 SUFFIX=""
 if [ -n "$PRESET" ]; then
-  PRESET_ARG=(--preset="$PRESET")
+  LH_ARGS+=(--preset="$PRESET")
   SUFFIX="_$PRESET"
 fi
 
@@ -94,8 +97,7 @@ while IFS=$'\t' read -r STRATEGY TIER URL; do
         --output=json \
         --output-path="$FILE" \
         --chrome-flags="--headless=new --no-sandbox --disable-extensions --disable-brave-update --disable-sync --no-first-run --disable-background-networking" \
-        "${PRESET_ARG[@]}" \
-        --quiet >>"$LOG" 2>&1; then
+        "${LH_ARGS[@]}" >>"$LOG" 2>&1; then
       echo "ok"
     else
       echo "GAGAL (lihat results/run.log)"

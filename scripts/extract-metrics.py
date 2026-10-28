@@ -124,30 +124,53 @@ def main() -> None:
             flag = "" if n >= 10 else "   <- di bawah 10, kurang untuk uji statistik"
             print(f"  {strategy:4} {tier:7} {n:3} run{flag}")
 
-    # Deteksi resource terblokir. Testbed memuat tepat 20 gambar per
-    # halaman; kalau image_requests kurang dari itu, ada yang diblokir
-    # browser (mis. Shields) dan hasilnya TIDAK sah dibandingkan.
-    print("\nCek integritas — gambar yang benar-benar terunduh:")
+    # Cek integritas resource.
+    #
+    # CATATAN: jumlah gambar yang terunduh TIDAK sama dengan 20 — itu
+    # normal, bukan pemblokiran. 16 dari 20 kartu memakai loading="lazy",
+    # dan pada viewport mobile (default Lighthouse) gambar di bawah
+    # lipatan memang tidak diunduh. Yang menandakan masalah hanyalah
+    # kalau kartu eager pun gagal termuat.
+    EAGER_CARDS = 4
+    print("\nCek integritas resource:")
     bad = False
+    byte_by_tier = {}
     for strategy in ("csr", "ssg", "ssr"):
         for tier in ("light", "medium", "heavy"):
             sel = [r for r in rows if r["strategy"] == strategy and r["tier"] == tier]
-            if not sel:
-                continue
-            reqs = [r.get("image_requests") for r in sel if r.get("image_requests") != ""]
-            byts = [r.get("image_bytes") for r in sel if r.get("image_bytes") != ""]
+            reqs = [r["image_requests"] for r in sel if r.get("image_requests") not in ("", None)]
+            byts = [r["image_bytes"] for r in sel if r.get("image_bytes") not in ("", None)]
             if not reqs:
                 continue
-            lo, hi = min(reqs), max(reqs)
             avg_mb = round(sum(byts) / len(byts) / 1024 / 1024, 2) if byts else 0
+            byte_by_tier.setdefault(tier, []).append(avg_mb)
             warn = ""
-            if hi < 20:
-                warn = "   <- KURANG DARI 20, ada resource terblokir"
+            if min(reqs) < EAGER_CARDS:
+                warn = f"   <- di bawah {EAGER_CARDS} kartu eager, ada yang terblokir"
                 bad = True
-            print(f"  {strategy:4} {tier:7} gambar {lo}-{hi} req, rata-rata {avg_mb} MB{warn}")
+            print(
+                f"  {strategy:4} {tier:7} gambar {min(reqs)}-{max(reqs)} req, "
+                f"rata-rata {avg_mb} MB{warn}"
+            )
+
+    # Bukti sesungguhnya bahwa variasi beban media bekerja: total byte
+    # harus naik tegas light -> medium -> heavy.
+    if len(byte_by_tier) >= 2:
+        print("\nVariasi beban media (rata-rata byte gambar per tier):")
+        prev = None
+        for tier in ("light", "medium", "heavy"):
+            if tier not in byte_by_tier:
+                continue
+            avg = round(sum(byte_by_tier[tier]) / len(byte_by_tier[tier]), 2)
+            arrow = ""
+            if prev is not None and avg <= prev:
+                arrow = "   <- TIDAK naik dari tier sebelumnya, periksa konfigurasi"
+                bad = True
+            print(f"  {tier:7} {avg:8} MB{arrow}")
+            prev = avg
+
     if bad:
-        print("\n  PERINGATAN: sebagian gambar tidak terunduh. Periksa pemblokiran")
-        print("  di browser host sebelum memakai data ini.")
+        print("\n  PERINGATAN: ada anomali di atas. Periksa sebelum memakai data ini.")
 
     if skipped:
         print(f"\n{len(skipped)} file dilewati:")
