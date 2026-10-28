@@ -33,6 +33,37 @@ if ! command -v lighthouse >/dev/null; then
   exit 1
 fi
 
+# Browser host untuk Lighthouse. Default: Brave (sudah terpasang).
+# Testbed ini tidak memuat resource pihak ketiga sama sekali - seluruh
+# JS dan gambar berasal dari domain sendiri - sehingga Brave Shields
+# tidak punya apa pun untuk diblokir. Tetap diverifikasi secara empiris
+# lewat kolom image_requests/image_bytes di metrics.csv: kalau ada
+# resource yang diblokir, angkanya akan anjlok dan langsung ketahuan.
+#
+# Ganti browser lewat env var kalau perlu:
+#   CHROME_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+if [ -z "${CHROME_PATH:-}" ]; then
+  for CANDIDATE in \
+    "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser" \
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+    "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
+  do
+    if [ -x "$CANDIDATE" ]; then
+      export CHROME_PATH="$CANDIDATE"
+      break
+    fi
+  done
+fi
+
+if [ -z "${CHROME_PATH:-}" ] || [ ! -x "$CHROME_PATH" ]; then
+  echo "Tidak ada browser Chromium yang ditemukan. Set CHROME_PATH manual." >&2
+  exit 1
+fi
+
+echo "Browser : $CHROME_PATH"
+echo "Versi   : $("$CHROME_PATH" --version 2>/dev/null | head -1)"
+echo "Run     : $RUNS per sel"
+
 PRESET_ARG=()
 SUFFIX=""
 if [ -n "$PRESET" ]; then
@@ -62,7 +93,7 @@ while IFS=$'\t' read -r STRATEGY TIER URL; do
         --only-categories=performance \
         --output=json \
         --output-path="$FILE" \
-        --chrome-flags="--headless=new --no-sandbox --disable-extensions" \
+        --chrome-flags="--headless=new --no-sandbox --disable-extensions --disable-brave-update --disable-sync --no-first-run --disable-background-networking" \
         "${PRESET_ARG[@]}" \
         --quiet >>"$LOG" 2>&1; then
       echo "ok"

@@ -75,6 +75,11 @@ def main() -> None:
         score = ((d.get("categories") or {}).get("performance") or {}).get("score")
         row["performance_score"] = round(score * 100, 1) if score is not None else ""
 
+        # versi browser host -> dicatat karena penelitian ini memakai
+        # Brave, bukan Chrome. Wajib dinyatakan di Bab 3.
+        env = d.get("environment") or {}
+        row["user_agent"] = env.get("hostUserAgent", "")
+
         for audit_id, col in AUDITS.items():
             v = (audits.get(audit_id) or {}).get("numericValue")
             row[col] = round(v, 2) if isinstance(v, (int, float)) else ""
@@ -101,7 +106,7 @@ def main() -> None:
         "strategy", "tier", "run", "preset", "performance_score",
         "fcp_ms", "lcp_ms", "tbt_ms", "cls", "si_ms", "tti_ms",
         "image_bytes", "image_requests", "total_bytes",
-        "lighthouse_version", "fetch_time", "url",
+        "lighthouse_version", "user_agent", "fetch_time", "url",
     ]
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", newline="") as fh:
@@ -118,6 +123,31 @@ def main() -> None:
             n = sum(1 for r in rows if r["strategy"] == strategy and r["tier"] == tier)
             flag = "" if n >= 10 else "   <- di bawah 10, kurang untuk uji statistik"
             print(f"  {strategy:4} {tier:7} {n:3} run{flag}")
+
+    # Deteksi resource terblokir. Testbed memuat tepat 20 gambar per
+    # halaman; kalau image_requests kurang dari itu, ada yang diblokir
+    # browser (mis. Shields) dan hasilnya TIDAK sah dibandingkan.
+    print("\nCek integritas — gambar yang benar-benar terunduh:")
+    bad = False
+    for strategy in ("csr", "ssg", "ssr"):
+        for tier in ("light", "medium", "heavy"):
+            sel = [r for r in rows if r["strategy"] == strategy and r["tier"] == tier]
+            if not sel:
+                continue
+            reqs = [r.get("image_requests") for r in sel if r.get("image_requests") != ""]
+            byts = [r.get("image_bytes") for r in sel if r.get("image_bytes") != ""]
+            if not reqs:
+                continue
+            lo, hi = min(reqs), max(reqs)
+            avg_mb = round(sum(byts) / len(byts) / 1024 / 1024, 2) if byts else 0
+            warn = ""
+            if hi < 20:
+                warn = "   <- KURANG DARI 20, ada resource terblokir"
+                bad = True
+            print(f"  {strategy:4} {tier:7} gambar {lo}-{hi} req, rata-rata {avg_mb} MB{warn}")
+    if bad:
+        print("\n  PERINGATAN: sebagian gambar tidak terunduh. Periksa pemblokiran")
+        print("  di browser host sebelum memakai data ini.")
 
     if skipped:
         print(f"\n{len(skipped)} file dilewati:")
