@@ -1,3 +1,11 @@
-ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver
+# Keputusan eksplisit soal build script. Tanpa ini pnpm keluar dengan
+# exit 1 di CI (ERR_PNPM_IGNORED_BUILDS) walaupun di lokal hanya warning.
+#
+# sharp         : dipakai Next.js untuk Image Optimization. Project ini
+#                 memakai <img> biasa, bukan next/image, tapi binary
+#                 ter-patch tetap disertakan sebagai mitigasi CVE-2026-96889.
+# unrs-resolver : resolver untuk eslint-import-resolver-typescript,
+#                 dev-only, tidak masuk bundle produksi.
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
