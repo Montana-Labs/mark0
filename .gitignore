@@ -60,5 +60,7 @@ ENVIRONMENT.txt
 audit-before-*.txt
 audit-after-*.txt
 
-# Aset media variasi beban (P0-3) — bisa ratusan MB
-api-middleware/public/media/
+# Aset media variasi beban (P0-3) SENGAJA di-commit (53 MB).
+# Vercel men-deploy dari git — kalau aset tidak ikut, express.static
+# menyajikan folder kosong dan seluruh eksperimen gagal di produksi.
+# Sekaligus menjamin penguji dapat mereproduksi dengan byte yang sama.

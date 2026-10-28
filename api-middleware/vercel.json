@@ -2,6 +2,12 @@
   "buildCommand": "echo skip",
   "outputDirectory": "public",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/api" }
+    {
+      "source": "/(.*)",
+      "destination": "/api"
+    }
+  ],
+  "regions": [
+    "sin1"
   ]
 }
