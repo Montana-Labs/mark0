@@ -151,6 +151,13 @@ async function fetchWithCache(url: string): Promise<unknown> {
   }
 }
 
+// Vercel menaruh function di belakang proxy. Tanpa ini req.protocol
+// mengembalikan "http", sehingga URL gambar yang dihasilkan jadi http://
+// dan diblokir browser sebagai mixed content pada halaman https://.
+// Akibatnya gambar tidak pernah termuat dan variasi beban media tidak
+// terukur sama sekali.
+app.set("trust proxy", true);
+
 app.use(cors());
 app.use(express.json());
 
