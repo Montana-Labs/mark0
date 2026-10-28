@@ -54,8 +54,12 @@ load-testing/results-*.json
 .pnp
 .pnp.*
 
-# Hasil pengukuran & audit (generated, jangan masuk git)
-results/
+# Hasil pengukuran & audit
+# results/raw/ TIDAK di-commit (135 file x ~385 KB = ~52 MB) dan bisa
+# dihasilkan ulang. Tapi metrics.csv + analisis.md WAJIB masuk git:
+# itu data per-run dan hasil ujinya, bukti utama Bab 4.
+results/raw/
+results/run.log
 ENVIRONMENT.txt
 audit-before-*.txt
 audit-after-*.txt

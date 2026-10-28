@@ -1,7 +1,47 @@
 # 📌 Rencana Revisi — Menyelaraskan mark0 dengan Judul Kolokium
 
 > **Dibuat:** 27 Oktober 2026
-> **Status:** P1-6 ✅ · P0-1 ✅ · P0-2 ✅ · P0-3 🟡 (gambar ✅, video menunggu Keputusan A) · P0-4 ✅. **Semua P0 beres.** Berikutnya: **P1-5 (runner 9 sel × 15 run + uji statistik)**.
+> **Status:** Semua P0 ✅ · P1-6 ✅ · P1-5 🟡 (Lighthouse 135 run + uji statistik ✅, k6 & SonarQube belum).
+> Berikutnya: **load testing k6 (RQ3)**, lalu SonarQube (sekunder), lalu tulis Bab 4.
+
+## 📊 Hasil pengukuran utama (28 Okt 2026, 135 run)
+
+Data: `results/metrics.csv` · Analisis: `results/analisis.md`
+
+**Temuan headline — beban media mengalahkan strategi rendering:**
+
+| Faktor terhadap LCP | p | effect size |
+|---|---|---|
+| Beban media (RQ2) | ≈3×10⁻⁹ | **ε² = 0,88** |
+| Strategi rendering (RQ1) | 0,005–0,00006 | ε² = 0,17–0,41 |
+
+Beban media menjelaskan 88% variasi LCP, strategi rendering hanya 17–41%.
+Ini menjawab langsung judul kolokium.
+
+**LCP rata-rata (ms):**
+
+| Tier | CSR | SSG | SSR |
+|---|---|---|---|
+| light | **2.947** | 4.120 | 3.853 |
+| medium | **6.106** | 9.754 | 7.438 |
+| heavy | **16.311** | 25.006 | 25.177 |
+
+CSR unggul di semua tier. **SSG vs SSR tidak pernah berbeda signifikan**
+(p = 0,07–0,97) untuk LCP.
+
+**TBT — biaya hydration terukur bersih:** CSR **0,00 ms di seluruh 135 run**
+vs SSG 58–67 ms, SSR 61–77 ms (ε² = 0,68–0,69).
+
+**CLS = 0,00 di seluruh 135 run** → tidak bisa diuji. Penyebabnya
+`ProductCard` menetapkan `width`/`height` pada tiap `<img>`, sehingga ruang
+sudah dipesan sebelum gambar termuat. Tulis sebagai TEMUAN, bukan kegagalan.
+
+**Variabilitas tier heavy tinggi** (SD LCP sampai 13.778 ms di SSG heavy) →
+laporkan median, bukan mean, untuk tier heavy.
+
+**Environment:** Brave Browser 154.1.96.59 (bukan Chrome — wajib dinyatakan
+di Bab 3), Lighthouse 13.5.0, k6 2.3.0, Node v26.0.0, pnpm 11.1.2,
+default Lighthouse = emulasi mobile + throttling tersimulasi.
 > **Tujuan dokumen:** satu sumber kebenaran tentang apa yang masih harus diperbaiki agar project `mark0` sesuai judul & metodologi di `kolokium.pdf`. Dibaca ulang setiap kali melanjutkan pekerjaan.
 
 **Dokumen pasangan:** `LANGKAH_UPGRADE.md` — runbook perintah upgrade dependency + kebersihan cache (eksekusi P1-6 ada di sana).
@@ -132,23 +172,23 @@ File: `api-middleware/src/index.ts`, `api-middleware/src/data/products.json`
 
 # 🟡 P1 — Harus beres SEBELUM ambil data final
 
-## [ ] P1-5. Repeated trials + uji statistik yang sesungguhnya
+## [~] 🟡 P1-5. Repeated trials + uji statistik — **LIGHTHOUSE SELESAI 28 Okt 2026**, k6 & SonarQube belum yang sesungguhnya
 
 **Masalah:** kolokium janji **10–20x per skenario** + **ANOVA/Kruskal-Wallis + post-hoc** (bagian 8.3). Yang ada: **1x run**, hanya rata-rata.
 
 ⚠️ Tanpa raw data per-run tidak ada standar deviasi, dan **tanpa SD tidak ada ANOVA**.
 
 **Yang dikerjakan:**
-- [ ] Script runner: 9 sel × 15 run, simpan **tiap run**
+- [x] Script runner: 9 sel × 15 run, simpan **tiap run** (`scripts/run-lighthouse.sh`)
   ```
   results/raw/{strategy}_{tier}_{run}.json
   results/metrics.csv        # 135 baris, 1 baris = 1 run
   ```
-- [ ] Mode production, bukan dev server
-- [ ] Warmup middleware (`GET /cache/warmup`) sebelum tiap batch
-- [ ] Statistik deskriptif: mean, SD, min, max per sel
-- [ ] Urutan uji: **Shapiro-Wilk** (normalitas) → **Levene** (homogenitas varians) → lolos: **ANOVA + Tukey** / tidak lolos: **Kruskal-Wallis + Dunn**
-- [ ] Laporkan juga uji untuk faktor beban media (RQ2), bukan cuma faktor rendering (RQ1)
+- [x] Mode production (URL Vercel), bukan dev server
+- [x] Warmup middleware (`GET /cache/warmup`) sebelum tiap batch
+- [x] Statistik deskriptif: mean, SD, min, max, median per sel
+- [x] Urutan uji terpasang di `scripts/analyze.py`. **Hasil: 35/35 uji memakai Kruskal-Wallis, nol ANOVA** — tidak ada satu pun kelompok yang lolos normalitas + homogenitas. Post-hoc: Mann-Whitney + Bonferroni
+- [x] RQ1 diuji per tier, RQ2 diuji per strategi — terpisah supaya kedua faktor tidak saling mencemari
 
 ---
 
