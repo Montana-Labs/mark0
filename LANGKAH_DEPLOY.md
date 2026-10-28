@@ -47,11 +47,49 @@ Login bersifat interaktif (buka browser). Jalankan lewat prefix `!` supaya outpu
 
 Semua app butuh URL-nya, jadi ini harus pertama.
 
+> ⚠️ **JALANKAN SATU PER SATU, jangan di-paste berbarengan.**
+> `vercel link`, `vercel --prod`, dan `vercel project rm` semuanya punya prompt
+> interaktif yang akan **memakan baris perintah berikutnya** sebagai jawaban.
+> Terbukti 28 Okt 2026: `rm -rf .vercel` ter-paste ke kolom konfirmasi
+> penghapusan project.
+
 ```bash
 cd ~/Documents/Developer/skripsi/mark0/api-middleware
 vercel link --yes --project mark0-middleware
+```
+```bash
 vercel --prod
 ```
+
+> ⚠️ **JEBAKAN: Project Settings menimpa `vercel.json`.**
+> Saat `vercel link` dijalankan, CLI membaca `vercel.json` **saat itu juga** dan
+> menyimpan `buildCommand`/`outputDirectory` sebagai **Project Settings** di
+> dashboard. Kalau `vercel.json` kemudian diperbaiki, setting lama **tetap
+> dipakai** dan error-nya berulang persis sama.
+>
+> Gejalanya: log build masih menjalankan perintah lama (mis. `skip`) walaupun
+> `vercel.json` sudah bersih.
+>
+> Dua cara memperbaiki:
+> 1. **Dashboard** — Project Settings → Build & Development Settings → matikan
+>    override pada Build Command dan Output Directory
+> 2. **Buat ulang project** — `vercel project rm <nama>`, lalu `rm -rf .vercel`,
+>    lalu `vercel link` lagi (kali ini `vercel.json` sudah benar)
+
+### Catatan: Express berjalan native
+
+Vercel menjalankan Express tanpa konfigurasi. **Jangan** pakai pola lama
+`api/` + rewrites + `outputDirectory`. Cukup sediakan file yang memanggil
+`app.listen(process.env.PORT)` di salah satu lokasi yang dicari Vercel:
+`index.*`, `app.*`, `server.*`, atau `src/` dari ketiganya.
+
+Di project ini entrypoint-nya `api-middleware/src/index.ts`.
+
+### Catatan: build region ≠ function region
+
+Log akan menampilkan `Running build in Washington, D.C. – iad1`. Itu **normal** —
+itu region tempat build berjalan. `regions: ["sin1"]` mengatur region tempat
+function melayani request, diverifikasi lewat header `x-vercel-id` (lihat §5).
 
 Catat URL yang keluar, lalu **verifikasi tiga hal ini sebelum lanjut**:
 
