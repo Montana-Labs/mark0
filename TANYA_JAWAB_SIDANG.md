@@ -97,6 +97,104 @@ Tiga cara, bisa didemokan langsung:
 
 ---
 
+# A-bis. Asimetri CSR–SSR–SSG
+
+> Bagian ini lahir dari keresahan penulis sendiri, dan justru itulah
+> pertanyaan paling tajam yang mungkin diajukan penguji. Kalau hanya satu
+> bagian yang sempat kamu kuasai, pilih bagian ini.
+
+## A8. "Kenapa CSR hanya diwakili React? Kenapa Next.js tidak diuji CSR juga?"
+
+**Jawaban singkat:** Karena Batasan Masalah #1 menetapkan demikian, dan asimetrinya bersifat teknis — bukan pilihan sembarangan.
+
+**Kutipan dari proposal yang sudah disetujui:**
+
+> "Penelitian ini berfokus pada perbandingan strategi rendering, yaitu Client-Side Rendering (CSR) **menggunakan React.js** serta Server-Side Rendering (SSR) dan Static Site Generation (SSG) **menggunakan Next.js**."
+
+Kemampuan teknis kedua teknologi memang tidak simetris:
+
+| | CSR | SSR | SSG |
+|---|---|---|---|
+| React + Vite | bisa | **tidak bisa** | **tidak bisa** |
+| Next.js | bisa | bisa | bisa |
+
+React tanpa framework tambahan **tidak memiliki kemampuan rendering di sisi server sama sekali**. Jadi grid simetris 2×3 tidak mungkin dibentuk tanpa mengubah hakikat React sebagai representasi CSR murni.
+
+---
+
+## A9. "Bukankah Next.js diuntungkan karena bisa tiga strategi, sementara React hanya satu?"
+
+**Jawaban singkat:** Tidak. Tidak ada penjumlahan skor antar strategi — setiap sel diukur sendiri-sendiri.
+
+**Analogi:** pelari tidak menang karena mendaftar di tiga nomor lomba. Yang dibandingkan catatan waktu per nomor, bukan banyaknya nomor yang diikuti.
+
+**Data pendukung — dan ini bagian terpentingnya: hasilnya justru kebalikan dari dugaan itu.**
+
+| Metrik | CSR (React) | SSG (Next) | SSR (Next) | Unggul |
+|---|---|---|---|---|
+| LCP light | **2.947** | 4.120 | 3.853 | **React** |
+| LCP medium | **6.106** | 9.754 | 7.438 | **React** |
+| LCP heavy | **16.311** | 25.006 | 25.177 | **React** |
+| TBT (semua tier) | **0,00 ms** | 58–67 ms | 61–77 ms | **React** |
+
+React unggul pada **LCP — Core Web Vitals utama — di ketiga tier**, dan TBT-nya nol mutlak pada seluruh 135 run. Next.js hanya unggul pada FCP.
+
+Kalau desain ini benar-benar berat sebelah ke Next.js, hasil seperti ini mustahil terjadi.
+
+---
+
+## A10. "Next.js dibangun di atas React. Bukankah itu membuat perbandingannya tidak adil?"
+
+**Jawaban singkat:** Justru sebaliknya — itu fondasi yang membuat perbandingan ini adil.
+
+Karena Next.js memakai React di dalamnya, dan versinya **19.2.4 persis sama** dengan aplikasi React, maka yang dibandingkan bukan dua teknologi tak sejenis. Mesin render, model komponen, dan cara kerja UI-nya identik. **Yang berbeda hanya di mana HTML dirakit.**
+
+**Pembanding yang tidak adil** akan terlihat seperti ini: React (TypeScript, komponen, hydration) versus Laravel Blade (PHP, MVC, tanpa JavaScript ke klien). Beda bahasa, beda paradigma, beda runtime — tidak mungkin diatribusikan ke satu faktor. Kandidat itu memang dipertimbangkan dan **ditolak** pada tahap pemilihan judul, tercatat di `DISKUSI_JUDUL_SKRIPSI.md`.
+
+**Apple-to-apple diukur dari variabel terkontrol, bukan dari jumlah kondisi yang diuji.** Lihat A2 untuk daftar buktinya.
+
+---
+
+## A11. "Kenapa React tidak dibuat SSR saja dengan framework lain?"
+
+**Jawaban singkat:** Karena begitu dipasangi framework, React bukan lagi representasi CSR murni — dan studinya berubah jadi perbandingan tiga framework.
+
+Framework yang paling masuk akal untuk itu adalah **React Router v7 framework mode**, yang merupakan kelanjutan dari Remix. Kandidat Remix sudah dipertimbangkan dan ditolak pada tahap pemilihan judul dengan alasan terdokumentasi: hasilnya terlalu mirip dengan Next.js, tidak punya SSG bawaan, dan urgensi industrinya lemah.
+
+Menempuh jalan itu berarti **memperlebar scope**, bukan memperkuat penelitian.
+
+---
+
+## A12. "Kenapa tidak Next.js saja untuk ketiga strategi? Itu lebih bersih."
+
+**Jawaban singkat:** Secara metodologi memang lebih bersih, tetapi judul dan proposal sudah disetujui pada seminar kolokium dengan kerangka React versus Next.js.
+
+Yang hilang kalau judulnya diganti:
+
+| | |
+|---|---|
+| Tinjauan pustaka | Bab 2 dibangun dari literatur perbandingan React dan Next.js |
+| Rumusan Masalah | Tiga dari empat RM menyebut perbandingan kedua teknologi secara eksplisit |
+| Urgensi industri | Hilang skenario nyatanya: *"perusahaan sudah memakai React, apakah sepadan bermigrasi ke Next.js?"* |
+
+Penelitian ini mempertahankan kerangka yang disetujui, dan menyatakan asimetrinya secara terbuka sebagai keterbatasan.
+
+---
+
+## A13. ⚠️ Keterbatasan yang WAJIB kamu sebut sendiri
+
+Ini satu-satunya keberatan yang benar-benar sah pada desain ini. Sebutkan sebelum penguji menemukannya:
+
+> **Karena CSR hanya diamati pada React, pengaruh strategi rendering dan pengaruh framework tidak dapat dipisahkan sepenuhnya.** Ketika hasil menunjukkan CSR unggul pada LCP, secara ketat belum dapat dipastikan apakah keunggulan itu berasal dari strategi CSR-nya atau dari karakteristik React sebagai pustaka yang lebih ringan dibanding Next.js.
+
+**Kalimat lengkap untuk Bab 3:**
+
+> "Sesuai Batasan Masalah, penelitian ini membandingkan strategi rendering dengan React sebagai representasi Client-Side Rendering dan Next.js sebagai representasi Server-Side Rendering serta Static Site Generation. Asimetri ini bersifat teknis: React tanpa framework tambahan tidak mendukung rendering di sisi server, sehingga pengujian ketiga strategi pada kedua teknologi secara simetris tidak dimungkinkan. Konsekuensinya, pengaruh strategi rendering dan pengaruh framework tidak dapat dipisahkan sepenuhnya pada kondisi CSR, dan hal ini dinyatakan sebagai keterbatasan penelitian."
+
+**Cara menutup celah ini (opsional):** menambahkan route CSR pada Next.js memungkinkan dua perbandingan tambahan — Next-CSR vs Next-SSG vs Next-SSR (efek strategi murni dalam satu framework) dan React-CSR vs Next-CSR (efek framework murni pada satu strategi). Dengan itu, selisih yang semula tidak dapat diatribusikan menjadi terukur.
+
+---
+
 # B. Metodologi Pengukuran
 
 ## B1. "Kenapa 15 kali pengulangan? Kenapa tidak sekali saja?"
