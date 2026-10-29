@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testbed Strategi Rendering — mark0</title>
+<style>
+  :root {
+    --bg: #0b0d12; --card: #151924; --line: #232838;
+    --fg: #e8eaf0; --muted: #8b93a7; --accent: #4c8dff;
+    --light: #3ecf8e; --medium: #e8a33d; --heavy: #e8556d;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#f6f7fa; --card:#fff; --line:#e3e6ee; --fg:#141824; --muted:#6b7280; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 20px 64px;
+    font: 15px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg); color: var(--fg);
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 32px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em;
+       color: var(--muted); margin: 32px 0 12px; font-weight: 600; }
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+  a.cell {
+    display: block; padding: 16px 18px; border: 1px solid var(--line);
+    border-radius: 12px; background: var(--card); color: inherit;
+    text-decoration: none; transition: border-color .15s, transform .15s;
+  }
+  a.cell:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .tier { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 99px;
+          text-transform: uppercase; letter-spacing: 0.04em; color: #0b0d12; }
+  .tier.light { background: var(--light); }
+  .tier.medium { background: var(--medium); }
+  .tier.heavy { background: var(--heavy); }
+  .strat { font-weight: 650; font-size: 15px; }
+  .bytes { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .url { color: var(--muted); font-size: 12px; word-break: break-all; margin-top: 6px;
+         font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .note { margin-top: 36px; padding: 16px 18px; border-left: 3px solid var(--accent);
+          background: var(--card); border-radius: 0 8px 8px 0; font-size: 14px; }
+  .note strong { color: var(--fg); }
+  .note p { margin: 0 0 10px; color: var(--muted); }
+  .note p:last-child { margin: 0; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+         font-size: 0.92em; background: rgba(127,127,127,.14);
+         padding: 1px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Testbed Strategi Rendering × Variasi Beban Media</h1>
+  <p class="sub">
+    9 sel pengujian — 3 strategi rendering × 3 tingkat beban media.
+    Angka byte adalah rata-rata terukur dari 135 run Lighthouse.
+  </p>
+
+  <h2>CSR — React + Vite</h2>
+  <div class="grid" id="csr"></div>
+
+  <h2>SSG — Next.js, Static Site Generation</h2>
+  <div class="grid" id="ssg"></div>
+
+  <h2>SSR — Next.js, Server-Side Rendering</h2>
+  <div class="grid" id="ssr"></div>
+
+  <h2>API</h2>
+  <div class="grid" id="api"></div>
+
+  <div class="note">
+    <p><strong>Kenapa pindah URL, bukan tombol pengubah tier?</strong></p>
+    <p>
+      Tier beban media ditetapkan pada tahap <em>build</em>, bukan runtime.
+      Halaman SSG dibekukan menjadi berkas HTML saat build, sehingga tidak
+      mungkin diubah tier-nya oleh interaksi di browser. Jika tier diganti
+      lewat parameter runtime, CSR dan SSR akan menurut sementara SSG tidak —
+      ketiga strategi tidak lagi diperlakukan simetris dan perbandingannya
+      menjadi tidak adil.
+    </p>
+    <p>
+      Karena itu setiap kombinasi strategi dan tier merupakan build serta
+      deployment yang terpisah, dengan kode sumber identik dan hanya berbeda
+      pada satu variabel lingkungan
+      (<code>MEDIA_TIER</code> / <code>VITE_MEDIA_TIER</code>).
+    </p>
+    <p>
+      <strong>Memverifikasi tier yang aktif:</strong> buka DevTools →
+      tab Network → filter Img. URL gambar akan menunjukkan
+      <code>/media/&lt;tier&gt;/</code> beserta ukurannya.
+    </p>
+  </div>
+</div>
+
+<script>
+  const TIERS = [
+    { id: "light",  bytes: "1,28 MB" },
+    { id: "medium", bytes: "6,20 MB" },
+    { id: "heavy",  bytes: "26,63 MB" },
+  ];
+  const GROUPS = [
+    { el: "csr", label: "CSR", url: t => `https://mark0-react-${t}.vercel.app/` },
+    { el: "ssg", label: "SSG", url: t => `https://mark0-next-${t}.vercel.app/ssg` },
+    { el: "ssr", label: "SSR", url: t => `https://mark0-next-${t}.vercel.app/ssr` },
+  ];
+
+  for (const g of GROUPS) {
+    document.getElementById(g.el).innerHTML = TIERS.map(t => `
+      <a class="cell" href="${g.url(t.id)}" target="_blank" rel="noopener">
+        <div class="row">
+          <span class="tier ${t.id}">${t.id}</span>
+          <span class="strat">${g.label}</span>
+        </div>
+        <div class="bytes">gambar terunduh ~${t.bytes}</div>
+        <div class="url">${g.url(t.id).replace("https://", "")}</div>
+      </a>
+    `).join("");
+  }
+
+  document.getElementById("api").innerHTML = [
+    ["/health", "status + daftar tier"],
+    ["/products?media=heavy", "20 produk, URL gambar tier heavy"],
+    ["/media/heavy/img-01.jpg", "satu gambar tier heavy (~2,1 MB)"],
+  ].map(([path, desc]) => `
+    <a class="cell" href="https://mark0-middleware.vercel.app${path}" target="_blank" rel="noopener">
+      <div class="row"><span class="strat">${path}</span></div>
+      <div class="bytes">${desc}</div>
+    </a>
+  `).join("");
+</script>
+</body>
+</html>
