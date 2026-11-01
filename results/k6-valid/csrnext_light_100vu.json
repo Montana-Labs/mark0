@@ -1,0 +1,15 @@
+{
+  "label": "csrnext_light_100vu",
+  "url": "https://mark0-next-light.vercel.app/csr",
+  "vus": 100,
+  "total_requests": 5259,
+  "throughput_rps": 79.9954889784728,
+  "duration_avg_ms": 51.17974101540223,
+  "duration_med_ms": 44.792,
+  "duration_p95_ms": 72.3121,
+  "duration_p99_ms": 230.60065999999998,
+  "duration_max_ms": 361.495,
+  "http_error_rate": 0,
+  "sla_breach_rate": 0,
+  "data_received_bytes": 42700836
+}

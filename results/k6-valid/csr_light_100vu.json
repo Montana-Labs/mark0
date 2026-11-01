@@ -1,0 +1,15 @@
+{
+  "label": "csr_light_100vu",
+  "url": "https://mark0-react-light.vercel.app/",
+  "vus": 100,
+  "total_requests": 5214,
+  "throughput_rps": 79.25809317249444,
+  "duration_avg_ms": 50.9993630609897,
+  "duration_med_ms": 44.357,
+  "duration_p95_ms": 76.51159999999999,
+  "duration_p99_ms": 159.42323999999996,
+  "duration_max_ms": 276.161,
+  "http_error_rate": 0,
+  "sla_breach_rate": 0,
+  "data_received_bytes": 3492526
+}

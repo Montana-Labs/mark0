@@ -1,0 +1,15 @@
+{
+  "label": "ssr_light_100vu",
+  "url": "https://mark0-next-light.vercel.app/ssr",
+  "vus": 100,
+  "total_requests": 4617,
+  "throughput_rps": 69.95643957814433,
+  "duration_avg_ms": 199.7393246696993,
+  "duration_med_ms": 153.199,
+  "duration_p95_ms": 501.3441999999999,
+  "duration_p99_ms": 758.0132,
+  "duration_max_ms": 1963.215,
+  "http_error_rate": 0,
+  "sla_breach_rate": 0,
+  "data_received_bytes": 228585581
+}

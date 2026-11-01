@@ -1,0 +1,15 @@
+{
+  "label": "ssg_light_100vu",
+  "url": "https://mark0-next-light.vercel.app/ssg",
+  "vus": 100,
+  "total_requests": 4993,
+  "throughput_rps": 75.8544372642937,
+  "duration_avg_ms": 108.69591728419813,
+  "duration_med_ms": 102.148,
+  "duration_p95_ms": 173.3661999999999,
+  "duration_p99_ms": 240.37843999999993,
+  "duration_max_ms": 788.149,
+  "http_error_rate": 0,
+  "sla_breach_rate": 0,
+  "data_received_bytes": 245769111
+}

@@ -403,6 +403,25 @@ Penjelasannya masuk akal: ketika beban media besar, waktu transfer gambar mendom
 # D. Keterbatasan & Titik Rawan
 
 > Bagian ini sengaja ditulis supaya kamu yang menyebutkannya lebih dulu, bukan penguji.
+>
+> 📄 **Daftar lengkap 13 keterbatasan beserta buktinya ada di `KETERBATASAN.md`** — itu yang dipakai saat menulis subbab Keterbatasan Penelitian.
+
+## D0. 🔴 "Katanya menguji sampai 1000 pengguna. Mana datanya?"
+
+**Jawaban singkat:** Hanya 100 pengguna virtual yang berhasil diukur secara sah. Pada beban lebih tinggi, mitigasi DDoS otomatis Vercel menghadang request — sehingga yang terukur adalah ambang perlindungan platform, bukan kapasitas aplikasi.
+
+**Bukti bahwa ini bukan kegagalan arsitektur:**
+
+1. **CSR-React ikut error 16%** padahal hanya menyajikan berkas statis dari CDN. CDN tidak mungkin tumbang pada 181 request/detik.
+2. **Throughput turun justru saat error naik.** Burst 900 VU ke target sama: 605 req/s, 0% error. Ramp panjang 1000 VU: 181 req/s, 56% error. Pola ini hanya masuk akal bila ada yang menolak request.
+3. Header respons: `x-vercel-mitigated: challenge`. Dashboard firewall: 100.300 request di-*challenge*.
+4. Pengecualian IP hanya tersedia pada plan berbayar.
+
+**Yang tetap terbukti pada 100 VU, nol error:** SSR 200 ms vs CSR 51 ms — **3,9× lebih berat**. Trade-off inti RQ3 terjawab.
+
+**Jangan pernah mengatakan** "SSR gagal menangani 500 pengguna". Itu firewall, bukan arsitektur.
+
+---
 
 ## D1. Istilah Core Web Vitals
 
