@@ -29,30 +29,35 @@ def main():
         with open(f) as fh:
             rows.append(json.load(fh))
 
-    rows.sort(key=lambda r: URUT.index(r["label"].split("_")[0])
-              if r["label"].split("_")[0] in URUT else 99)
+    def kunci(r):
+        bagian = r["label"].split("_")
+        strat = bagian[0]
+        vu = int(bagian[-1].replace("vu", "")) if bagian[-1].endswith("vu") else 0
+        return (vu, URUT.index(strat) if strat in URUT else 99)
+
+    rows.sort(key=kunci)
 
     lines = []
     def emit(s=""):
         print(s)
         lines.append(s)
 
-    tier = rows[0]["label"].split("_", 1)[1] if "_" in rows[0]["label"] else "?"
-    profil = rows[0].get("profile", "?")
+    tier = rows[0]["label"].split("_")[1] if "_" in rows[0]["label"] else "?"
 
     emit("# Hasil Load Testing (RQ3)")
     emit()
-    emit(f"Tier beban media: **{tier}** · Profil: **{profil}**")
+    emit(f"Tier beban media: **{tier}**")
     emit()
     emit("> k6 hanya mengunduh dokumen HTML, tidak mengunduh gambar. Pengujian")
     emit("> ini mengukur biaya generasi dokumen di sisi server, bukan pengaruh")
     emit("> beban media — yang diukur terpisah melalui Lighthouse.")
     emit()
-    emit("| Strategi | Total req | Throughput | Rata-rata | Median | p95 | Maks | Error rate | SLA breach |")
-    emit("|---|---|---|---|---|---|---|---|---|")
+    emit("| VU | Strategi | Total req | Throughput | Rata-rata | Median | p95 | Maks | Error rate | SLA breach |")
+    emit("|---|---|---|---|---|---|---|---|---|---|")
     for r in rows:
         key = r["label"].split("_")[0]
         emit(
+            f"| {r.get('vus', '?')} "
             f"| {NAMA.get(key, key)} "
             f"| {int(r['total_requests'] or 0):,} "
             f"| {round(r['throughput_rps'] or 0)} req/s "

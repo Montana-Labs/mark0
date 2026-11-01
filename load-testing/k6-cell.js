@@ -33,27 +33,26 @@ const docDuration = new Trend("document_duration");
 const TARGET_URL = __ENV.TARGET_URL;
 const LABEL = __ENV.LABEL || "unlabeled";
 
-// Mode ringan untuk uji coba: PROFILE=smoke
-const SMOKE = __ENV.PROFILE === "smoke";
+// Jumlah pengguna virtual untuk SATU pengukuran.
+// Kolokium 8.2.1 menyebut 100, 500, dan 1000 pengguna simultan —
+// itu TIGA pengukuran terpisah, bukan satu tanjakan panjang.
+const VUS = Number(__ENV.VUS || 100);
+
+// Durasi fase stabil. Sengaja tidak terlalu panjang: beban tinggi yang
+// bertahan lama memicu proteksi otomatis platform, sehingga yang terukur
+// bukan lagi kapasitas aplikasi melainkan ambang perlindungan Vercel.
+const HOLD = __ENV.HOLD || "45s";
 
 export const options = {
   scenarios: {
     load_test: {
       executor: "ramping-vus",
       startVUs: 0,
-      stages: SMOKE
-        ? [
-            { duration: "10s", target: 20 },
-            { duration: "20s", target: 20 },
-            { duration: "5s", target: 0 },
-          ]
-        : [
-            { duration: "30s", target: 100 },
-            { duration: "1m", target: 500 },
-            { duration: "1m", target: 1000 },
-            { duration: "2m", target: 1000 },
-            { duration: "30s", target: 0 },
-          ],
+      stages: [
+        { duration: "15s", target: VUS },
+        { duration: HOLD, target: VUS },
+        { duration: "5s", target: 0 },
+      ],
     },
   },
   // Ambang ini untuk PELAPORAN, bukan untuk menggugurkan pengujian.
@@ -86,7 +85,7 @@ export function handleSummary(data) {
   const ringkas = {
     label: LABEL,
     url: TARGET_URL,
-    profile: SMOKE ? "smoke" : "full",
+    vus: VUS,
     total_requests: get("http_reqs", "count"),
     throughput_rps: get("http_reqs", "rate"),
     duration_avg_ms: get("http_req_duration", "avg"),
@@ -101,7 +100,7 @@ export function handleSummary(data) {
 
   const baris = [
     "",
-    `  ${LABEL}  (${ringkas.profile})`,
+    `  ${LABEL}  @ ${VUS} VU`,
     `  total request     ${Math.round(ringkas.total_requests)}`,
     `  throughput        ${Math.round(ringkas.throughput_rps)} req/s`,
     `  durasi rata-rata  ${Math.round(ringkas.duration_avg_ms)} ms`,
