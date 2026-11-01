@@ -1,5 +1,14 @@
 # Daftar 9 sel pengujian: strategi × tier beban media
 # format: strategi<TAB>tier<TAB>url
+#
+#   csr     = Client-Side Rendering, React + Vite
+#   csrnext = Client-Side Rendering, Next.js (next/dynamic ssr:false)
+#   ssg     = Static Site Generation, Next.js
+#   ssr     = Server-Side Rendering, Next.js
+#
+# csrnext ditambahkan untuk memisahkan pengaruh STRATEGI dari pengaruh
+# FRAMEWORK, yang pada desain awal bercampur karena CSR hanya diamati
+# pada React.
 csr	light	https://mark0-react-light.vercel.app/
 csr	medium	https://mark0-react-medium.vercel.app/
 csr	heavy	https://mark0-react-heavy.vercel.app/
@@ -9,3 +18,6 @@ ssg	heavy	https://mark0-next-heavy.vercel.app/ssg
 ssr	light	https://mark0-next-light.vercel.app/ssr
 ssr	medium	https://mark0-next-medium.vercel.app/ssr
 ssr	heavy	https://mark0-next-heavy.vercel.app/ssr
+csrnext	light	https://mark0-next-light.vercel.app/csr
+csrnext	medium	https://mark0-next-medium.vercel.app/csr
+csrnext	heavy	https://mark0-next-heavy.vercel.app/csr

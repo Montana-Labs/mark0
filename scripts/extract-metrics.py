@@ -30,7 +30,7 @@ AUDITS = {
     "interactive": "tti_ms",
 }
 
-FILENAME = re.compile(r"^(csr|ssg|ssr)_(light|medium|heavy)_(\d+)(?:_(\w+))?\.json$")
+FILENAME = re.compile(r"^(csr|csrnext|ssg|ssr)_(light|medium|heavy)_(\d+)(?:_(\w+))?\.json$")
 
 
 def main() -> None:
@@ -118,11 +118,11 @@ def main() -> None:
 
     # ringkasan kelengkapan per sel
     print("\nKelengkapan per sel:")
-    for strategy in ("csr", "ssg", "ssr"):
+    for strategy in ("csr", "csrnext", "ssg", "ssr"):
         for tier in ("light", "medium", "heavy"):
             n = sum(1 for r in rows if r["strategy"] == strategy and r["tier"] == tier)
             flag = "" if n >= 10 else "   <- di bawah 10, kurang untuk uji statistik"
-            print(f"  {strategy:4} {tier:7} {n:3} run{flag}")
+            print(f"  {strategy:7} {tier:7} {n:3} run{flag}")
 
     # Cek integritas resource.
     #
@@ -135,7 +135,7 @@ def main() -> None:
     print("\nCek integritas resource:")
     bad = False
     byte_by_tier = {}
-    for strategy in ("csr", "ssg", "ssr"):
+    for strategy in ("csr", "csrnext", "ssg", "ssr"):
         for tier in ("light", "medium", "heavy"):
             sel = [r for r in rows if r["strategy"] == strategy and r["tier"] == tier]
             reqs = [r["image_requests"] for r in sel if r.get("image_requests") not in ("", None)]
@@ -149,7 +149,7 @@ def main() -> None:
                 warn = f"   <- di bawah {EAGER_CARDS} kartu eager, ada yang terblokir"
                 bad = True
             print(
-                f"  {strategy:4} {tier:7} gambar {min(reqs)}-{max(reqs)} req, "
+                f"  {strategy:7} {tier:7} gambar {min(reqs)}-{max(reqs)} req, "
                 f"rata-rata {avg_mb} MB{warn}"
             )
 

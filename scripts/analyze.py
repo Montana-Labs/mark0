@@ -38,7 +38,26 @@ CSV_IN = os.path.join(ROOT, "results", "metrics.csv")
 MD_OUT = os.path.join(ROOT, "results", "analisis.md")
 
 ALPHA = 0.05
-STRATEGIES = ["csr", "ssg", "ssr"]
+STRATEGIES = ["csr", "csrnext", "ssg", "ssr"]
+
+# Label untuk laporan
+NAMA = {
+    "csr": "CSR-React",
+    "csrnext": "CSR-Next",
+    "ssg": "SSG-Next",
+    "ssr": "SSR-Next",
+}
+
+# Analisis utama mengikuti Batasan Masalah: CSR diwakili React,
+# SSR dan SSG diwakili Next.js.
+RQ1_UTAMA = ["csr", "ssg", "ssr"]
+
+# Analisis pelengkap: ketiga strategi dalam SATU framework, sehingga
+# pengaruh strategi terpisah bersih dari pengaruh framework.
+RQ1_PELENGKAP = ["csrnext", "ssg", "ssr"]
+
+# Efek framework murni: strategi sama (CSR), framework berbeda.
+FRAMEWORK = ["csr", "csrnext"]
 TIERS = ["light", "medium", "heavy"]
 
 METRICS = [
@@ -198,22 +217,23 @@ def main():
                 if not vals:
                     continue
                 d = describe(vals)
-                emit(f"| {s.upper()} | {t} | {d['n']} | {d['mean']:.2f} | "
+                emit(f"| {NAMA[s]} | {t} | {d['n']} | {d['mean']:.2f} | "
                      f"{d['sd']:.2f} | {d['min']:.2f} | {d['max']:.2f} | "
                      f"{d['median']:.2f} |")
 
     # ---------- 2. RQ1: pengaruh strategi rendering ----------
     emit()
-    emit("## 2. RQ1 — Pengaruh Strategi Rendering (CSR vs SSG vs SSR)")
+    emit("## 2. RQ1 — Pengaruh Strategi Rendering (CSR-React vs SSG vs SSR)")
     emit()
-    emit("Diuji terpisah pada setiap tier beban media, agar faktor media")
-    emit("tidak mencemari perbandingan antar strategi.")
+    emit("Analisis utama, mengikuti Batasan Masalah #1: CSR diwakili React,")
+    emit("SSR dan SSG diwakili Next.js. Diuji terpisah pada setiap tier beban")
+    emit("media agar faktor media tidak mencemari perbandingan antar strategi.")
     for metric, label, _ in METRICS:
         emit()
         emit(f"### {label}")
         for t in TIERS:
-            groups = [(s.upper(), data[(s, t)][metric])
-                      for s in STRATEGIES
+            groups = [(NAMA[s], data[(s, t)][metric])
+                      for s in RQ1_UTAMA
                       if (s, t) in data and metric in data[(s, t)]]
             if len(groups) < 2:
                 continue
@@ -234,8 +254,49 @@ def main():
                       if (s, t) in data and metric in data[(s, t)]]
             if len(groups) < 2:
                 continue
-            emit(f"  strategi {s.upper()}:")
+            emit(f"  strategi {NAMA[s]}:")
             run_test(groups, "tier beban media")
+
+    # ---------- 4. Pelengkap: efek strategi dalam satu framework ----------
+    punya_csrnext = any(("csrnext", t) in data for t in TIERS)
+    if punya_csrnext:
+        emit()
+        emit("## 4. Analisis Pelengkap — Efek Strategi Murni (semua Next.js)")
+        emit()
+        emit("Membandingkan CSR, SSG, dan SSR yang ketiganya berjalan di atas")
+        emit("Next.js. Karena framework-nya sama, selisih yang muncul murni")
+        emit("berasal dari strategi rendering — bebas dari pengaruh framework.")
+        for metric, label, _ in METRICS:
+            emit()
+            emit(f"### {label}")
+            for t in TIERS:
+                groups = [(NAMA[s], data[(s, t)][metric])
+                          for s in RQ1_PELENGKAP
+                          if (s, t) in data and metric in data[(s, t)]]
+                if len(groups) < 2:
+                    continue
+                emit(f"  tier {t}:")
+                run_test(groups, "strategi rendering")
+
+        # ---------- 5. Efek framework murni ----------
+        emit()
+        emit("## 5. Analisis Pelengkap — Efek Framework Murni (CSR saja)")
+        emit()
+        emit("Membandingkan CSR pada React dengan CSR pada Next.js. Karena")
+        emit("strateginya sama, selisih yang muncul murni berasal dari")
+        emit("framework. Inilah yang memisahkan dua pengaruh yang pada desain")
+        emit("awal tidak dapat diatribusikan.")
+        for metric, label, _ in METRICS:
+            emit()
+            emit(f"### {label}")
+            for t in TIERS:
+                groups = [(NAMA[s], data[(s, t)][metric])
+                          for s in FRAMEWORK
+                          if (s, t) in data and metric in data[(s, t)]]
+                if len(groups) < 2:
+                    continue
+                emit(f"  tier {t}:")
+                run_test(groups, "framework")
 
     with open(MD_OUT, "w") as fh:
         fh.write("\n".join(out_lines) + "\n")
