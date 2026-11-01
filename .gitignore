@@ -71,3 +71,6 @@ audit-after-*.txt
 
 # Virtualenv untuk analisis statistik
 .venv/
+
+# Hasil load testing (generated)
+results/k6/
