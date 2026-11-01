@@ -1,80 +1,74 @@
 # 📌 Rencana Revisi — Menyelaraskan mark0 dengan Judul Kolokium
 
 > **Dibuat:** 27 Oktober 2026
-> **Status:** Semua P0 ✅ · P1-6 ✅ · P1-5 🟡 (Lighthouse 135 run + uji statistik ✅, k6 & SonarQube belum).
+> **Status:** Semua P0 ✅ · P1-6 ✅ · P1-5 🟡 (Lighthouse **180 run** + uji statistik ✅, k6 & SonarQube belum).
 > Berikutnya: **load testing k6 (RQ3)**, lalu SonarQube (sekunder), lalu tulis Bab 4.
 
-## 📊 Hasil pengukuran utama (28 Okt 2026, 135 run)
+## 📊 Hasil pengukuran utama (2 Nov 2026, 180 run)
 
-Data: `results/metrics.csv` · Analisis: `results/analisis.md`
+Data: `results/metrics.csv` · Analisis: `results/analisis.md` (lima bagian)
 
-**Temuan headline — beban media mengalahkan strategi rendering:**
+**Desain akhir: 4 strategi × 3 tier = 12 sel × 15 run = 180 run.**
+Sel `csrnext` (CSR pada Next.js) ditambahkan untuk memisahkan efek
+strategi dari efek framework — lihat A14–A16 di `TANYA_JAWAB_SIDANG.md`.
+
+### Temuan headline — beban media mengalahkan strategi rendering
 
 | Faktor terhadap LCP | p | effect size |
 |---|---|---|
-| Beban media (RQ2) | ≈3×10⁻⁹ | **ε² = 0,88** |
-| Strategi rendering (RQ1) | 0,005–0,00006 | ε² = 0,17–0,41 |
+| Beban media | 3–5×10⁻⁹ | **ε² = 0,86 – 0,88** |
+| Strategi rendering | 0,0014 – 0,74 | ε² = −0,03 – 0,27 |
 
-Beban media menjelaskan 88% variasi LCP, strategi rendering hanya 17–41%.
-Ini menjawab langsung judul kolokium.
+Konsisten di keempat strategi. Pada tier **heavy**, efek strategi bahkan
+**tidak signifikan sama sekali** (p = 0,74) — saat media sangat berat,
+waktu transfer mendominasi dan cara HTML dirakit jadi tidak relevan.
 
-**LCP rata-rata (ms):**
+### LCP rata-rata (ms)
 
-| Tier | CSR | SSG | SSR |
-|---|---|---|---|
-| light | **2.947** | 4.120 | 3.853 |
-| medium | **6.106** | 9.754 | 7.438 |
-| heavy | **16.311** | 25.006 | 25.177 |
+| Tier | CSR-React | CSR-Next | SSG-Next | SSR-Next |
+|---|---|---|---|---|
+| light | **3.224** | 3.507 | 3.865 | 3.991 |
+| medium | 8.301 | 7.411 | 9.463 | **5.910** |
+| heavy | 25.989 | 22.300 | 23.750 | **20.602** |
 
-CSR unggul di semua tier. **SSG vs SSR tidak pernah berbeda signifikan**
-(p = 0,07–0,97) untuk LCP.
+Tidak ada pemenang mutlak — berganti menurut beban media.
 
-**TBT — biaya hydration terukur bersih:** CSR **0,00 ms di seluruh 135 run**
-vs SSG 58–67 ms, SSR 61–77 ms (ε² = 0,68–0,69).
+### 🔴 Koreksi: TBT BUKAN biaya hydration
 
-**CLS = 0,00 di seluruh 135 run** → tidak bisa diuji. Penyebabnya
-`ProductCard` menetapkan `width`/`height` pada tiap `<img>`, sehingga ruang
-sudah dipesan sebelum gambar termuat. Tulis sebagai TEMUAN, bukan kegagalan.
+| Strategi | TBT | Hydration HTML server |
+|---|---|---|
+| CSR-React | **0,00 ms** | tidak ada |
+| CSR-Next | 63–77 ms | **tidak ada** (`ssr: false`) |
+| SSG-Next | 54–66 ms | ada |
+| SSR-Next | 58–61 ms | ada |
 
-**Variabilitas tier heavy tinggi** (SD LCP sampai 13.778 ms di SSG heavy) →
-laporkan median, bukan mean, untuk tier heavy.
+Next-CSR tanpa hydration tetap mencatat TBT setara SSG/SSR → selisihnya
+**efek runtime framework Next.js**, bukan efek strategi. Interpretasi lama
+(dari 135 run) keliru dan sudah dikoreksi di semua dokumen.
+
+### Peta efek
+
+| Metrik | Efek framework | Efek strategi |
+|---|---|---|
+| LCP | tidak signifikan (p = 0,69 / 0,79) | ya, kecuali tier heavy |
+| FCP | **kuat** (ε² = 0,74) | — |
+| TBT | **kuat** (ε² = 0,85) | tidak |
+| CLS | 0,00 di seluruh 180 run | 0,00 di seluruh 180 run |
+
+CLS nol disebabkan `width`/`height` ditetapkan pada tiap `<img>` → tulis
+sebagai TEMUAN, bukan kegagalan. Varians nol sehingga tidak dapat diuji.
+
+**Integritas data:** 180/180 run sukses, 13-13 request gambar di seluruh
+run, byte per tier **identik di keempat strategi** (1,28 / 6,20 / 26,63 MB).
+35+ uji statistik, **seluruhnya Kruskal-Wallis** — tidak ada kelompok yang
+lolos asumsi normalitas + homogenitas varians.
+
+**Variabilitas tier heavy tinggi** (SD LCP sampai 11.303 ms) → laporkan
+median di samping mean untuk tier heavy.
 
 **Environment:** Brave Browser 154.1.96.59 (bukan Chrome — wajib dinyatakan
 di Bab 3), Lighthouse 13.5.0, k6 2.3.0, Node v26.0.0, pnpm 11.1.2,
 default Lighthouse = emulasi mobile + throttling tersimulasi.
-> **Tujuan dokumen:** satu sumber kebenaran tentang apa yang masih harus diperbaiki agar project `mark0` sesuai judul & metodologi di `kolokium.pdf`. Dibaca ulang setiap kali melanjutkan pekerjaan.
-
-**Dokumen pasangan:** `LANGKAH_UPGRADE.md` — runbook perintah upgrade dependency + kebersihan cache (eksekusi P1-6 ada di sana).
-
----
-
-## 0. Konteks: judulnya sudah berubah
-
-| | Dokumen lama di `mark0/` (24 Mar 2026) | **Kolokium (yang berlaku)** |
-|---|---|---|
-| Judul | Evaluasi **Code Maintainability dan Core Web Vitals** Next.js dan React Berdasarkan Strategi Rendering CSR, SSR, dan SSG pada Aplikasi E-Commerce | Evaluasi Strategi Rendering React dan Next.js pada E-Commerce dengan **Variasi Beban Media** Menggunakan Core Web Vitals |
-| Variabel utama | maintainability + CWV | **variasi beban media** |
-| Maintainability / SonarQube | fokus utama | **analisis sekunder** (Batasan Masalah #6) |
-
-Semua `.md` di folder ini masih memakai framing lama. Kodenya pun belum punya variabel beban media.
-
-**Identitas:** NIM 71220843 · Prodi Informatika, Fakultas Teknologi Informasi, UKDW Yogyakarta · Proposal Desk Evaluation I, Semester Genap 2025/2026 · Repo: https://github.com/Montana-Labs/mark0
-
----
-
-## 1. Desain eksperimen yang DITUJU
-
-Grid final: **3 strategi rendering × 3 tier beban media = 9 sel**, halaman identik di semua sel.
-
-| | Light (50–150 KB) | Medium (200–800 KB) | Heavy (1–3 MB) |
-|---|---|---|---|
-| **CSR** (React + Vite) | sel 1 | sel 2 | sel 3 |
-| **SSG** (Next.js `/ssg`) | sel 4 | sel 5 | sel 6 |
-| **SSR** (Next.js `/ssr`) | sel 7 | sel 8 | sel 9 |
-
-Tiap sel dijalankan **15x** Lighthouse → 135 run → raw data per-run disimpan → baru bisa uji statistik.
-
----
 
 # 🔴 P0 — Blocking. Tanpa ini skripsi tidak defensible.
 
