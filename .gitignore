@@ -84,3 +84,6 @@ results/k6/
 
 # Foto produk sumber (diunduh dari fakestoreapi, bisa diambil ulang)
 media-source/
+
+# Arsip data rusak (metode simulate, dibuang, lihat commit 6b43f30)
+results/arsip-simulate-rusak/
