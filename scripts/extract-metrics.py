@@ -93,6 +93,16 @@ def main() -> None:
                 row["image_requests"] = it.get("requestCount", "")
             if it.get("resourceType") == "total":
                 row["total_bytes"] = it.get("transferSize", "")
+            # Lighthouse mengelompokkan video sebagai "media", bukan "video".
+            # Dicatat terpisah karena video SERING tidak terunduh penuh
+            # sebelum trace berakhir pada jaringan tersimulasi lambat --
+            # ini bukan bug, tapi temuan: byte video yang benar-benar
+            # terunduh berbeda sistematis antar strategi (CSR menunggu JS
+            # selesai dulu sebelum tahu URL video, SSG/SSR punya tag
+            # <video> langsung di HTML awal).
+            if it.get("resourceType") == "media":
+                row["video_bytes"] = it.get("transferSize", "")
+                row["video_requests"] = it.get("requestCount", "")
 
         rows.append(row)
 
@@ -105,7 +115,7 @@ def main() -> None:
     cols = [
         "strategy", "tier", "run", "preset", "performance_score",
         "fcp_ms", "lcp_ms", "tbt_ms", "cls", "si_ms", "tti_ms",
-        "image_bytes", "image_requests", "total_bytes",
+        "image_bytes", "image_requests", "video_bytes", "video_requests", "total_bytes",
         "lighthouse_version", "user_agent", "fetch_time", "url",
     ]
     os.makedirs(os.path.dirname(OUT), exist_ok=True)

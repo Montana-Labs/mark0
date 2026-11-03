@@ -83,6 +83,12 @@ CELL=0
 
 while IFS=$'\t' read -r STRATEGY TIER URL; do
   case "$STRATEGY" in \#*|"") continue ;; esac
+  # ONLY_TIER memfilter satu tier saja, dipakai untuk mengulang sebagian
+  # kecil tanpa menjalankan seluruh 12 sel (mis. setelah perbaikan
+  # --max-wait-for-load yang hanya relevan untuk tier heavy).
+  if [ -n "${ONLY_TIER:-}" ] && [ "$TIER" != "$ONLY_TIER" ]; then
+    continue
+  fi
   CELL=$((CELL + 1))
   echo
   echo "=== sel $CELL/$TOTAL — $STRATEGY / $TIER ==="
@@ -96,6 +102,7 @@ while IFS=$'\t' read -r STRATEGY TIER URL; do
         --only-categories=performance \
         --output=json \
         --output-path="$FILE" \
+        --max-wait-for-load="${MAX_WAIT_FOR_LOAD:-45000}" \
         --chrome-flags="--headless=new --no-sandbox --disable-extensions --disable-brave-update --disable-sync --no-first-run --disable-background-networking" \
         "${LH_ARGS[@]}" >>"$LOG" 2>&1; then
       echo "ok"
