@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ProductGrid from "../components/ProductGrid";
+import VideoBanner from "../components/VideoBanner";
 import type { Product } from "../types/product";
 
 const API_URL = import.meta.env.VITE_API_URL ||
@@ -19,6 +20,7 @@ const API_URL = import.meta.env.VITE_API_URL ||
  * Konsekuensi: satu build per tier (lihat LANGKAH_UPGRADE.md §7).
  */
 const MEDIA_TIER = import.meta.env.VITE_MEDIA_TIER || "light";
+const VIDEO_URL = `${API_URL}/media/${MEDIA_TIER}/vid-01.mp4`;
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -75,5 +77,10 @@ export default function Home() {
     );
   }
 
-  return <ProductGrid products={products} />;
+  return (
+    <>
+      <VideoBanner src={VIDEO_URL} />
+      <ProductGrid products={products} />
+    </>
+  );
 }

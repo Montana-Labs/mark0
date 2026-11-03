@@ -64,10 +64,17 @@ ENVIRONMENT.txt
 audit-before-*.txt
 audit-after-*.txt
 
-# Aset media variasi beban (P0-3) SENGAJA di-commit (53 MB).
-# Vercel men-deploy dari git — kalau aset tidak ikut, express.static
-# menyajikan folder kosong dan seluruh eksperimen gagal di produksi.
-# Sekaligus menjamin penguji dapat mereproduksi dengan byte yang sama.
+# Aset media variasi beban (P0-3).
+#
+# KEPUTUSAN BERUBAH setelah video ditambahkan: gambar saja (39 MB) masih
+# wajar di-commit, tetapi gambar+video bersama mencapai ~500 MB -- terlalu
+# besar untuk git. Aset TIDAK di-commit, tapi tetap sampai ke produksi
+# karena `vercel --prod` mengunggah langsung dari disk lokal, tidak
+# bergantung pada git. Reproducibility dijaga lewat kode generator
+# (scripts/generate-media.py, scripts/generate-video.py) + sumber di
+# media-source/ (foto asli, 4.6 MB, diunduh ulang lewat skrip) +
+# manifest ukuran (media-manifest.csv, video-manifest.csv, DI-commit).
+api-middleware/public/media/
 
 # Virtualenv untuk analisis statistik
 .venv/

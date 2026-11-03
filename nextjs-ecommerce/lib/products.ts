@@ -23,6 +23,10 @@ function apiUrl(): string {
   );
 }
 
+export function getVideoUrl(): string {
+  return `${apiUrl()}/media/${MEDIA_TIER}/vid-01.mp4`;
+}
+
 export async function getProducts(cache: RequestCache): Promise<Product[]> {
   const res = await fetch(`${apiUrl()}/products?media=${MEDIA_TIER}`, {
     cache,

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ProductGrid from "@/components/ProductGrid";
+import VideoBanner from "@/components/VideoBanner";
 import type { Product } from "@/types/product";
 
 /**
@@ -26,6 +27,7 @@ const API_URL =
     : "http://localhost:4000");
 
 const MEDIA_TIER = process.env.NEXT_PUBLIC_MEDIA_TIER || "light";
+const VIDEO_URL = `${API_URL}/media/${MEDIA_TIER}/vid-01.mp4`;
 
 export default function CsrCatalog() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -82,5 +84,10 @@ export default function CsrCatalog() {
     );
   }
 
-  return <ProductGrid products={products} />;
+  return (
+    <>
+      <VideoBanner src={VIDEO_URL} />
+      <ProductGrid products={products} />
+    </>
+  );
 }

@@ -1,5 +1,6 @@
 import ProductGrid from "@/components/ProductGrid";
-import { getProducts } from "@/lib/products";
+import VideoBanner from "@/components/VideoBanner";
+import { getProducts, getVideoUrl } from "@/lib/products";
 
 /**
  * Server-Side Rendering.
@@ -15,7 +16,12 @@ export default async function SsrCatalog() {
   try {
     const products = await getProducts("no-store");
 
-    return <ProductGrid products={products} />;
+    return (
+      <>
+        <VideoBanner src={getVideoUrl()} />
+        <ProductGrid products={products} />
+      </>
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
 
