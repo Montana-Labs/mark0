@@ -98,6 +98,15 @@ while IFS=$'\t' read -r STRATEGY TIER URL; do
     FILE="$OUT/${STRATEGY}_${TIER}_$(printf '%02d' "$i")${SUFFIX}.json"
     printf '    run %2d/%s ' "$i" "$RUNS"
 
+    # Lanjutkan dari titik terakhir: lewati run yang sudah punya berkas
+    # hasil valid (bukan 0 byte bekas tulisan terpotong). Berguna kalau
+    # proses terhenti di tengah jalan -- mis. Mac sempat tidur -- karena
+    # artinya tidak perlu mengulang run yang sudah selesai dari awal.
+    if [ -s "$FILE" ]; then
+      echo "lewati (sudah ada)"
+      continue
+    fi
+
     if lighthouse "$URL" \
         --only-categories=performance \
         --output=json \
