@@ -74,3 +74,6 @@ audit-after-*.txt
 
 # Hasil load testing (generated)
 results/k6/
+
+# Foto produk sumber (diunduh dari fakestoreapi, bisa diambil ulang)
+media-source/
