@@ -192,3 +192,64 @@
 | 13 | Definisi Core Web Vitals | tambah |
 
 **Terakhir diperbarui:** 3 November 2026
+
+---
+
+# Lampiran — Jawaban untuk 3 Masukan Dosen Kolokium
+
+> Ditambahkan 3 November 2026. Tiga masukan diterima saat sidang kolokium.
+> Jawaban di bawah disusun dari apa yang sudah dibangun dan diukur, bukan rencana.
+
+## Masukan 1 — "Perlu disebutkan aplikasi e-commerce apa yang digunakan: buatan sendiri atau CMS?"
+
+**Jawaban:** aplikasi dibangun sendiri (custom-built), bukan CMS seperti WordPress/WooCommerce, Shopify, atau Magento.
+
+**Sisipkan sebagai paragraf baru di 8.1 Pendekatan Penelitian, setelah penjelasan dua aplikasi:**
+
+> Kedua aplikasi dibangun sepenuhnya oleh peneliti, bukan menggunakan Content Management System (CMS) seperti WordPress dengan WooCommerce, Shopify, atau Magento. Keputusan ini diambil karena CMS pada umumnya sudah membawa arsitektur rendering tertentu yang tidak dapat diganti secara bebas — WooCommerce misalnya terikat pada rendering sisi server milik WordPress, sementara Shopify menentukan sendiri strategi rendering platformnya. Jika testbed dibangun di atas CMS, peneliti tidak dapat mengisolasi strategi rendering sebagai variabel bebas, dan hasil pengukuran akan tercampur dengan karakteristik bawaan platform tersebut. Dengan aplikasi yang dibangun sendiri, struktur komponen, halaman, dan sumber data dapat dijaga identik di antara kedua aplikasi, sehingga perbedaan hasil benar-benar dapat diatribusikan pada strategi rendering yang diuji.
+>
+> Kedua aplikasi mengambil data produk dari sumber yang sama, yaitu lapisan API middleware yang menyajikan dua puluh produk dengan struktur data identik (nama, harga, kategori, gambar, dan rating), diperkaya dengan media gambar dan video dalam tiga tingkat beban sebagai variabel utama penelitian.
+
+**Catatan jujur soal sumber data produk:** data produk (nama, harga, kategori) berasal dari FakeStoreAPI sebagai snapshot tetap, lalu gambar produknya diunduh ulang dan disajikan sendiri oleh middleware. Ini perlu disebut eksplisit supaya tidak terkesan data sepenuhnya rekaan.
+
+---
+
+## Masukan 2 — "Metrik apa yang digunakan untuk pengukuran performa server?"
+
+**Jawaban:** empat metrik dari k6, dibagi dua kelompok — waktu respons dan ketersediaan.
+
+**Sisipkan sebagai paragraf baru, bisa digabung ke 8.2.1 bagian Pengujian Performa Server:**
+
+> Pengujian performa server mengukur empat metrik. Kelompok pertama, waktu respons, mencakup rata-rata (average), median, persentil ke-95 (p95), dan nilai maksimum — keempatnya diukur dalam milidetik dan mencerminkan seberapa cepat server menjawab permintaan pada kondisi beban tertentu. Kelompok kedua, ketersediaan, mencakup throughput (jumlah permintaan yang berhasil dilayani per detik) serta dua metrik kegagalan yang sengaja dipisahkan: tingkat kesalahan (error rate), yaitu persentase respons berstatus selain 200, dan tingkat pelanggaran ambang waktu (SLA breach rate), yaitu persentase respons yang melebihi tiga detik. Pemisahan dua metrik kegagalan tersebut penting karena respons yang lambat tidak selalu berarti server gagal melayani permintaan.
+
+**Dasar pemilihan empat metrik ini** didukung praktik yang sama di penelitian sejenis — studi pengujian beban pada sistem informasi akademik memakai persis response time, throughput, dan error rate sebagai tiga metrik utamanya (Danutirta et al., 2026).
+
+---
+
+## Masukan 3 — "Perlu diperbanyak daftar pustaka serta sitasinya"
+
+**4 sitasi baru, sudah diverifikasi sumbernya langsung — bukan hasil mengarang.** Ditambahkan ke Daftar Pustaka, urut abjad:
+
+> Anggraini, E. P. (2024). Statistika non parametrik: Analisis perbedaan pengunjung website resmi Kabupaten Malang menurut Devices Mobile menggunakan Uji Kruskal-Wallis. Maliki Interdisciplinary Journal, 2(2).
+
+> Danutirta, A. S., Sulasno, M. S., Anto, D., & Igriza, M. (2026). Performance and rate limiting testing of an academic information system using the k6 testing tool: A case study of Politeknik XYZ. Simtek: Jurnal Sistem Informasi dan Teknik Komputer, 11(2), 410–419. https://doi.org/10.51876/simtek.v11i2.1824
+
+> Google. (2025). Interaction to Next Paint (INP). web.dev. Diakses dari https://web.dev/articles/inp
+
+**Dipakai di mana:**
+- Anggraini (2024) → mendukung 8.3 Analisis Data, bagian pemilihan uji Kruskal-Wallis untuk data yang tidak normal
+- Danutirta et al. (2026) → mendukung 8.2.1, pemilihan response time/throughput/error rate sebagai metrik server (lihat Masukan 2 di atas)
+- Google (2025) → mendukung 6.2.1 dan Batasan Masalah #2, definisi resmi Core Web Vitals (LCP, CLS, INP) dan alasan INP tidak diukur
+
+### Yang masih perlu kamu cari sendiri
+
+Saya temukan tapi **tidak bisa memverifikasi detail sitasinya** (halamannya memblokir pengambilan otomatis) — cek manual kalau mau dipakai:
+- Jurnal TIN: Terapan Informatika Nusantara, Vol 7 No 1, Juni 2026, tentang load testing k6 dengan 150 virtual users. URL: `ejurnal.seminar-id.com/index.php/tin/article/view/9838`
+
+Topik yang belum dicarikan sitasinya sama sekali — kalau dosen masih merasa kurang, prioritaskan ini:
+- Perbandingan performa video encoding / bitrate terhadap waktu muat halaman
+- Hydration pada React Server Components (untuk subbab 6.2.7 yang baru)
+- Metodologi pengujian A/B atau controlled experiment pada rendering strategi (umum, bukan spesifik web)
+
+**Saran pencarian:** Garuda (garuda.kemdikbud.go.id) dan Sinta (sinta.kemdikbud.go.id) untuk jurnal nasional terakreditasi — pola sitasi yang sudah ada di kolokiummu (Hanafi, Haryono, dkk.) semuanya dari sana. Kata kunci yang efektif: gabungkan istilah Indonesia + Inggris, misal "load testing aplikasi web k6" atau "static code analysis maintainability SonarQube".
+
