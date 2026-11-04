@@ -1,6 +1,6 @@
 # EVALUASI STRATEGI RENDERING REACT DAN NEXT.JS PADA E-COMMERCE DENGAN VARIASI BEBAN MEDIA MENGGUNAKAN CORE WEB VITALS
 
-> **Status:** draf kerja, 2 November 2026
+> **Status:** Bab 4 terisi data final, 4 November 2026. Lihat juga `~/Documents/Developer/skripsi/skripsi_1.docx` -- versi Word berbasis template kolokium dengan highlight kuning pada setiap perubahan.
 > **Penyusun:** Emmanuel Abel Zoe — 71220843
 > Program Studi Informatika, Fakultas Teknologi Informasi
 > Universitas Kristen Duta Wacana, Yogyakarta
