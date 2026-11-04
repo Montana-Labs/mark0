@@ -27,11 +27,13 @@ Ini judul **final** dari kolokium — berbeda dari judul paling awal di tahap di
 
 ## A3. Kenapa Memilih Judul Ini
 
-**Motivasi personal (sampaikan ini duluan, baru masuk ke riwayat keputusan di bawah):**
+**Inti pertanyaan penelitian -- dan ini memang makna literal dari judulnya sendiri:**
+
+Judul skripsi berbunyi **"Evaluasi *Strategi Rendering*"**, bukan "Evaluasi React dan Next.js". Kata kuncinya *strategi rendering* -- yang dibandingkan sejak awal memang **CSR vs SSR vs SSG** (client-side vs server-side), bukan perbandingan dua framework secara umum.
 
 > "Saya ingin mengetahui perbandingan antara Client-Side Rendering dengan Server-Side Rendering dan Static Site Generation -- antara pendekatan client-side dan server-side, mana yang lebih unggul. Dari sisi client-side diwakili React, dari sisi server-side diwakili Next.js."
 
-Ini pertanyaan dasar yang mendorong seluruh penelitian: **bukan "React vs Next.js" sebagai perang framework**, melainkan **CSR vs SSR/SSG** sebagai perbandingan dua filosofi rendering yang berbeda -- React dipilih sebagai representasi CSR karena itu pendekatan rendering aslinya, Next.js dipilih sebagai representasi SSR/SSG karena itu dua kemampuan utamanya di luar CSR.
+React dan Next.js di judul berperan sebagai **wakil** dari strategi rendering yang mau diuji -- React mewakili CSR karena itu pendekatan rendering aslinya, Next.js mewakili SSR dan SSG karena itu dua kemampuan utamanya di luar CSR. Kalau dosen bertanya "kenapa bandingkan React dan Next.js", jawabannya bukan "karena ingin tahu framework mana lebih bagus", tapi **"karena React dan Next.js adalah representasi paling natural untuk strategi rendering yang ingin diuji"**.
 
 ### Riwayat Keputusan Judul — 2 Tahap
 
