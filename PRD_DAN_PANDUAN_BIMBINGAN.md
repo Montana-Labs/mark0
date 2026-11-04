@@ -25,7 +25,15 @@
 
 Ini judul **final** dari kolokium — berbeda dari judul paling awal di tahap diskusi (lihat A3).
 
-## A3. Riwayat Keputusan Judul — 2 Tahap
+## A3. Kenapa Memilih Judul Ini
+
+**Motivasi personal (sampaikan ini duluan, baru masuk ke riwayat keputusan di bawah):**
+
+> "Saya ingin mengetahui perbandingan antara Client-Side Rendering dengan Server-Side Rendering dan Static Site Generation -- antara pendekatan client-side dan server-side, mana yang lebih unggul. Dari sisi client-side diwakili React, dari sisi server-side diwakili Next.js."
+
+Ini pertanyaan dasar yang mendorong seluruh penelitian: **bukan "React vs Next.js" sebagai perang framework**, melainkan **CSR vs SSR/SSG** sebagai perbandingan dua filosofi rendering yang berbeda -- React dipilih sebagai representasi CSR karena itu pendekatan rendering aslinya, Next.js dipilih sebagai representasi SSR/SSG karena itu dua kemampuan utamanya di luar CSR.
+
+### Riwayat Keputusan Judul — 2 Tahap
 
 **Tahap 1 — memilih React vs Next.js** (bukan Next.js vs Remix, bukan Laravel vs Next.js). Tiga kandidat dipertimbangkan:
 
