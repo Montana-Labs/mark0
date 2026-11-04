@@ -207,56 +207,66 @@ Ini satu-satunya keberatan yang benar-benar sah pada desain ini. Sebutkan sebelu
 
 ## A14. "Jadi perbedaan yang Anda ukur itu karena strateginya, atau karena framework-nya?"
 
-**Jawaban singkat:** Tergantung metriknya — dan sekarang terpisah secara terukur, bukan diduga.
+**Jawaban singkat:** Keduanya berpengaruh signifikan dan searah — framework memperlambat, strategi juga berpengaruh, dan keduanya terpisah secara terukur berkat kondisi CSR-Next.
 
-Dengan menambahkan Client-Side Rendering pada Next.js, penelitian ini memperoleh dua perbandingan yang saling melengkapi:
+> ⚠️ **Catatan metodologi penting.** Jawaban awal untuk pertanyaan ini sempat keliru akibat cacat pengukuran: Lighthouse secara default memakai `throttlingMethod: "simulate"`, yang pada pola render CSR (DOM berpindah total dari teks "Loading..." ke grid produk) salah mengidentifikasi elemen LCP. Setelah diperbaiki dengan `throttlingMethod: "devtools"` (throttling jaringan sungguhan, bukan simulasi) dan pengukuran diulang penuh, hasilnya berubah. Angka di bawah adalah hasil final yang sudah diverifikasi bebas dari cacat itu (0/15 anomali pada seluruh sel tier heavy).
 
-- **React-CSR vs Next-CSR** — strategi sama, framework berbeda → mengisolasi **efek framework**
-- **Next-CSR vs Next-SSG vs Next-SSR** — framework sama, strategi berbeda → mengisolasi **efek strategi**
+### Hasil final — efek framework (CSR-React vs CSR-Next, strategi sama)
 
-### Hasilnya
+| Tier | LCP CSR-React | LCP CSR-Next | p | ε² |
+|---|---|---|---|---|
+| light | 9.913 ms | 11.251 ms | 3,07×10⁻⁶ | 0,742 |
+| medium | 28.346 ms | 29.465 ms | 0,00033 | 0,424 |
+| heavy | 55.394 ms | 56.947 ms | 3,67×10⁻⁵ | 0,573 |
 
-| Metrik | Efek framework | Efek strategi |
+**Framework berpengaruh signifikan terhadap LCP di ketiga tier.** CSR-Next konsisten lebih lambat 1.000–1.500 ms dibanding CSR-React, pada strategi yang sama persis. Ini masuk akal: runtime Next.js membawa overhead (bundel lebih besar, inisialisasi framework) yang tidak ada pada React murni, terlepas dari strategi rendering yang dipakai.
+
+### Hasil final — efek strategi murni (CSR-Next vs SSG vs SSR, framework sama)
+
+| Tier | p | ε² |
 |---|---|---|
-| **LCP** | **tidak signifikan** (p = 0,69 medium; p = 0,79 heavy) | signifikan di light & medium |
-| **FCP** | **signifikan kuat** (ε² = 0,74) | — |
-| **TBT** | **signifikan kuat** (ε² = 0,85) | tidak |
-| **CLS** | nol di seluruh sel | nol di seluruh sel |
+| light | 4,09×10⁻⁷ | 0,653 |
+| medium | 4,22×10⁻⁷ | 0,651 |
+| heavy | 1,13×10⁻⁷ | **0,714** |
 
-**Implikasi untuk LCP:** karena framework terbukti tidak berpengaruh signifikan pada tier medium dan heavy, perbedaan LCP antar strategi memang berasal dari **strategi rendering**, bukan artefak pemilihan framework. Confound yang dikhawatirkan tidak terbukti.
+**Strategi rendering berpengaruh signifikan di ketiga tier, dan justru menguat pada tier heavy.** SSG dan SSR konsisten lebih cepat daripada CSR-Next di semua tier.
+
+**Kesimpulan gabungan:** LCP dipengaruhi baik oleh strategi rendering maupun oleh framework, dan keduanya terbukti berpengaruh secara independen dan dapat dipisahkan berkat kondisi CSR-Next. Confound yang dikhawatirkan di A8–A13 tetap relevan disebutkan sebagai keterbatasan rancangan asli, tetapi kini terjawab dengan data, bukan dugaan.
 
 ---
 
-## A15. ⚠️ "Bukankah TBT yang tinggi itu biaya hydration?"
+## A15. "Bukankah TBT yang tinggi itu biaya hydration?"
 
-**Jawaban singkat:** Tidak. Ini kesalahan interpretasi yang umum, dan data penelitian ini membantahnya.
+**Jawaban singkat:** Tidak. Data membantahnya, dan temuan ini tetap kokoh pada pengukuran final.
 
-| Strategi | TBT | Hydration HTML server? |
+| Strategi | TBT (light / medium / heavy) | Hydration HTML server? |
 |---|---|---|
-| CSR-React | **0,00 ms** | tidak ada |
-| **CSR-Next** | **63–77 ms** | **tidak ada** (`ssr: false`) |
-| SSG-Next | 54–66 ms | ada |
-| SSR-Next | 58–61 ms | ada |
+| CSR-React | 0,0 / 5,0 / 137,2 ms | tidak ada |
+| **CSR-Next** | **83,3 / 82,6 / 83,3 ms** | **tidak ada** (`ssr: false`) |
+| SSG-Next | 32,3 / 69,6 / 83,7 ms | ada |
+| SSR-Next | 34,7 / 57,7 / 82,9 ms | ada |
 
-Next-CSR memakai `next/dynamic` dengan `ssr: false`, sehingga HTML yang dikirim server **kosong** — tidak ada apa pun untuk di-hydrate. Namun TBT-nya tetap 63–77 ms, setara dengan SSG dan SSR.
+CSR-Next memakai `next/dynamic` dengan `ssr: false`, sehingga HTML yang dikirim server **kosong** — tidak ada apa pun untuk di-hydrate. Namun TBT-nya tetap stabil di kisaran 83 ms pada ketiga tier, setara dengan SSG dan SSR, dan jauh di atas CSR-React.
 
-**Kesimpulan:** selisih TBT berasal dari **runtime framework Next.js**, bukan dari proses hydration maupun dari strategi rendering. Tanpa sel CSR-Next, kesimpulan yang keliru ini tidak akan pernah terdeteksi.
+**Kesimpulan:** selisih TBT berasal dari **runtime framework Next.js**, bukan dari proses hydration maupun dari strategi rendering. CSR-React yang benar-benar tanpa framework tambahan adalah satu-satunya kondisi dengan TBT mendekati nol. Tanpa sel CSR-Next, kesimpulan ini tidak akan pernah terbukti.
 
 ---
 
 ## A16. "Apakah pilihan strategi rendering selalu berpengaruh?"
 
-**Jawaban singkat:** Tidak. Pada beban media berat, pengaruhnya hilang.
+**Jawaban singkat:** Ya, pada ketiga tier — dan pengaruhnya justru paling kuat pada beban terberat.
 
-Uji efek strategi murni (semua Next.js) terhadap LCP:
+Uji efek strategi murni (CSR-Next vs SSG vs SSR, framework sama) terhadap LCP:
 
-| Tier | p | Kesimpulan |
-|---|---|---|
-| light | 0,013 | signifikan |
-| medium | 0,0014 | signifikan |
-| **heavy** | **0,74** | **tidak signifikan** |
+| Tier | p | ε² | Kesimpulan |
+|---|---|---|---|
+| light | 4,09×10⁻⁷ | 0,653 | signifikan |
+| medium | 4,22×10⁻⁷ | 0,651 | signifikan |
+| **heavy** | **1,13×10⁻⁷** | **0,714** | **signifikan, terkuat** |
 
-Ketika media sangat berat, waktu transfer gambar mendominasi keseluruhan LCP sehingga perbedaan cara HTML dirakit menjadi tidak berarti. Temuan ini memperkuat tesis utama penelitian: **beban media lebih menentukan daripada strategi rendering**.
+Pada analisis utama (CSR-React vs SSG vs SSR, sesuai Batasan Masalah), polanya sama: SSG dan SSR berbeda signifikan dari CSR-React pada ketiga tier, dan SSG vs SSR sendiri mulai berbeda signifikan pada tier heavy (p = 0,016, sebelumnya tidak signifikan pada light dan medium).
+
+**Implikasi:** strategi rendering tetap relevan bahkan pada beban media terberat — tidak hilang pengaruhnya seperti dugaan awal. Namun ini tidak mengubah temuan utama penelitian: efek beban media (ε² ≈ 0,86–0,88 pada RQ2, lihat C1) tetap jauh lebih besar daripada efek strategi rendering (ε² ≈ 0,65–0,71) maupun efek framework (ε² ≈ 0,42–0,74). Beban media tetap faktor paling dominan, strategi rendering adalah faktor kedua yang juga terbukti bermakna.
 
 ---
 
@@ -336,38 +346,39 @@ Generator-nya mendukung foto asli: cukup taruh `01.jpg`..`20.jpg` di folder `med
 
 ## C1. "Apa temuan utama penelitian ini?"
 
-**Beban media jauh lebih menentukan daripada strategi rendering.**
+**Beban media adalah faktor paling dominan, diikuti strategi rendering dan framework, keduanya juga signifikan.**
 
 | Faktor terhadap LCP | p | effect size |
 |---|---|---|
-| Variasi beban media | 3–5×10⁻⁹ | **ε² = 0,86 – 0,88** |
-| Strategi rendering | 0,0014 – 0,74 | ε² = −0,03 – 0,27 |
+| Variasi beban media (RQ2) | 3,18×10⁻⁹ | **ε² = 0,884** (tertinggi) |
+| Strategi rendering, framework sama (RQ1 pelengkap) | 4,09×10⁻⁷ – 1,13×10⁻⁷ | ε² = 0,65 – 0,71 |
+| Framework, strategi sama (CSR-React vs CSR-Next) | 3,67×10⁻⁵ – 3,07×10⁻⁶ | ε² = 0,42 – 0,74 |
 
-Beban media menjelaskan **sekitar 87%** variasi LCP, konsisten pada keempat strategi. Pengaruh strategi rendering jauh lebih kecil, dan pada tier heavy bahkan tidak signifikan sama sekali.
+Beban media menjelaskan **sekitar 88%** variasi LCP — jauh di atas dua faktor lainnya, dan konsisten di keempat strategi (ε² = 0,884 identik pada CSR-Next, SSG-Next, SSR-Next; 0,860 pada CSR-React). Strategi rendering dan framework sama-sama terbukti berpengaruh signifikan, dengan skala pengaruh yang sebanding satu sama lain tapi keduanya di bawah pengaruh beban media.
 
-**Implikasi praktis:** untuk e-commerce padat media, mengoptimalkan media memberi dampak jauh lebih besar daripada berganti strategi rendering. Ini menjawab langsung judul penelitian.
+**Implikasi praktis:** untuk e-commerce padat media, mengoptimalkan media tetap memberi dampak terbesar, tetapi pemilihan strategi rendering dan framework bukan faktor yang bisa diabaikan. Ini menjawab langsung judul penelitian sekaligus memperkaya nuansanya — bukan "media saja yang penting", melainkan "media paling penting, dan sisanya tetap bermakna".
 
 ---
 
 ## C2. "Jadi mana yang lebih baik, React atau Next.js?"
 
-**Tidak ada pemenang mutlak — dan itu justru temuannya.**
+**Next.js (SSG/SSR) unggul LCP secara konsisten; React-CSR unggul responsivitas (TBT).**
 
 **LCP rata-rata (ms):**
 
 | Tier | CSR-React | CSR-Next | SSG-Next | SSR-Next |
 |---|---|---|---|---|
-| light | **3.224** | 3.507 | 3.865 | 3.991 |
-| medium | 8.301 | 7.411 | 9.463 | **5.910** |
-| heavy | 25.989 | 22.300 | 23.750 | **20.602** |
+| light | 9.913 | 11.251 | 8.892 | **8.961** |
+| medium | 28.346 | 29.465 | **26.612** | 25.909 |
+| heavy | 55.394 | 56.947 | 43.582 | **42.806** |
 
-Pemenangnya berganti menurut kondisi: React-CSR tercepat pada beban ringan, SSR-Next tercepat pada beban sedang dan berat.
+Urutan kecepatan LCP **konsisten di ketiga tier**: SSR-Next dan SSG-Next selalu terdepan, CSR-React di tengah, CSR-Next selalu paling lambat. Tidak ada pembalikan posisi seperti dugaan sebelumnya — pola ini jauh lebih tegas setelah throttling jaringan diperbaiki menjadi pengukuran sungguhan (lihat A14).
 
-**TBT:** React-CSR **0,00 ms pada seluruh 180 run**; seluruh varian Next.js 54–77 ms. Ini efek framework, bukan efek strategi (lihat A15).
+**TBT:** CSR-React paling rendah (0,0–137,2 ms, tergantung tier); CSR-Next, SSG-Next, SSR-Next semuanya di kisaran 32–84 ms. Ini efek framework, bukan efek strategi maupun hydration (lihat A15).
 
-**FCP:** seluruh varian Next.js lebih cepat daripada React, termasuk Next-CSR — sehingga ini juga efek framework (ε² = 0,74).
+**FCP:** CSR-React paling lambat (≈1.800 ms konsisten); ketiga varian Next.js (termasuk CSR-Next) semuanya ≈1.300–1.350 ms — pola yang sama seperti TBT, menguatkan bahwa ini efek framework.
 
-Jadi: Next.js unggul pada kecepatan tampil awal, React unggul pada responsivitas, dan LCP bergantung pada beban media. **Itulah trade-off yang dicari penelitian ini.**
+Jadi: Next.js (SSG/SSR) unggul LCP di semua kondisi, React-CSR unggul responsivitas (TBT) dan kecepatan render awal murni (FCP lebih lambat tapi TBT jauh lebih rendah). **Itulah trade-off yang dicari penelitian ini** — bukan satu pemenang mutlak, melainkan dua sumbu performa yang berlawanan arah.
 
 ---
 

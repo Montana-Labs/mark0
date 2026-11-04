@@ -180,6 +180,22 @@ Karena itu "Security Rating A" **tidak berarti aplikasinya aman**. Konsisten den
 
 ---
 
+## 14. ✅ RESOLVED — Lighthouse `throttlingMethod: simulate` sempat menghasilkan LCP tidak valid
+
+**Masalah yang ditemukan.** Pengukuran 180 run pertama (sebelum perbaikan ini) memakai pengaturan bawaan Lighthouse, `throttlingMethod: "simulate"`. Pada metode ini, jaringan sungguhan berjalan di kecepatan asli (cepat), lalu metrik performa **dihitung ulang** lewat model matematis -- bukan diukur langsung dari observasi nyata.
+
+Untuk strategi CSR (yang menukar total DOM dari teks "Loading..." menjadi grid produk setelah data diterima), model simulasi ini salah mengidentifikasi elemen LCP. Akibatnya, **13 dari 15 run CSR-React dan 14 dari 15 run CSR-Next pada tier heavy** menghasilkan LCP yang terkunci pada teks pemuatan awal (sekitar 2 detik), bukan pada gambar produk yang sesungguhnya -- padahal 29-38 MB gambar dan video masih diunduh di latar belakang saat trace pengukuran berakhir.
+
+**Bukti diagnostik:** pada run yang rusak, FCP, LCP, dan TTI tercatat sangat berdekatan (misalnya 1.220 / 2.301 / 2.301 ms) walau ukuran halaman mencapai puluhan megabita -- pola klasik metrik yang "terkunci" pada tampilan awal, bukan tampilan akhir.
+
+**Perbaikan.** Seluruh 180 pengukuran diulang dengan `throttlingMethod: "devtools"` (throttling jaringan diterapkan sungguhan, bukan disimulasikan secara matematis) dan `max-wait-for-load` diperpanjang menjadi 240 detik. Hasilnya diverifikasi bersih: 0 dari 15 run pada tiap sel tier heavy menunjukkan gejala serupa, dan LCP naik konsisten dari tier light ke heavy pada keempat strategi.
+
+**Dampak pada kesimpulan.** Kesimpulan awal bahwa "efek framework tidak signifikan terhadap LCP" dan "efek strategi hilang pada tier heavy" **terbukti keliru** -- keduanya berasal dari data yang cacat. Dengan data yang benar, baik efek strategi rendering maupun efek framework terbukti signifikan pada ketiga tier, dengan efek strategi justru menguat pada tier heavy (ε² = 0,714, tertinggi di antara ketiga tier).
+
+**Status:** ✅ diperbaiki dan diverifikasi sebelum data final digunakan. Dicatat di sini sebagai bentuk transparansi proses penelitian -- bukan disembunyikan -- karena menunjukkan proses verifikasi yang cermat terhadap validitas instrumen pengukuran.
+
+---
+
 # Ringkasan status
 
 | # | Keterbatasan | Status |
@@ -197,6 +213,7 @@ Karena itu "Security Rating A" **tidak berarti aplikasinya aman**. Konsisten den
 | 11 | Variabilitas tier heavy | ✅ ditangani |
 | 12 | Pilot study tidak sebanding | ✅ dilabeli ulang |
 | 13 | SonarQube SAST bukan SCA | 🟡 perbaiki saat menulis |
+| 14 | Lighthouse throttling simulate -> LCP tidak valid | ✅ ditemukan & diperbaiki |
 
 ---
 
