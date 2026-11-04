@@ -81,7 +81,7 @@ Variasi beban media menjelaskan **sekitar 87% variasi LCP** — jauh di atas dua
 | Load testing server (k6) | ✅ Selesai (terbatas 100 pengguna virtual — lihat poin 7) |
 | Analisis statistik | ✅ Selesai |
 | Draf Bab 4 (Hasil Penelitian) | ✅ Selesai |
-| Analisis SonarQube (maintainability, sekunder) | ⬜ Belum dikerjakan |
+| Analisis SonarQube (maintainability, sekunder) | ✅ Selesai -- kedua aplikasi Maintainability Rating A, 0% duplikasi kode |
 | Bab 5 (Kesimpulan & Saran) | ⬜ Belum ditulis |
 | Penyesuaian redaksional Bab 1–3 | 🟡 Sebagian — menunggu arahan dosen |
 
@@ -93,7 +93,7 @@ Variasi beban media menjelaskan **sekitar 87% variasi LCP** — jauh di atas dua
 
 2. **Gambar dan video produk** — sudah memakai foto produk asli (bukan sintetis), diambil dari sumber data yang sama dengan datanya (FakeStoreAPI). Mohon konfirmasi apakah ini sudah cukup memadai, atau perlu foto/video yang benar-benar dari toko sungguhan.
 
-3. **Urutan pengerjaan selanjutnya** — apakah boleh menulis Bab 5 dulu berdasarkan data yang sudah ada, sambil SonarQube dikerjakan paralel? Atau SonarQube harus selesai dulu sebelum Bab 5 ditulis?
+3. **Lanjut ke penulisan Bab 5** — SonarQube sudah selesai (kedua aplikasi Maintainability Rating A, duplikasi kode 0%, lihat `results/sonarqube.md`). Mohon arahan apakah boleh langsung menulis Bab 5 berdasarkan seluruh data yang sudah terkumpul.
 
 ---
 
