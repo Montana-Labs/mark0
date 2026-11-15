@@ -43,6 +43,11 @@ const VUS = Number(__ENV.VUS || 100);
 // bukan lagi kapasitas aplikasi melainkan ambang perlindungan Vercel.
 const HOLD = __ENV.HOLD || "45s";
 
+// Folder keluaran hasil. Bawaan tetap ../results/k6 (perilaku lama, dipakai
+// pengujian di Vercel); pengujian server lokal mengisi OUT_DIR sendiri
+// supaya data Vercel di results/k6-valid tidak tercampur.
+const OUT_DIR = __ENV.OUT_DIR || "../results/k6";
+
 export const options = {
   scenarios: {
     load_test: {
@@ -114,6 +119,6 @@ export function handleSummary(data) {
 
   return {
     stdout: baris,
-    [`../results/k6/${LABEL}.json`]: JSON.stringify(ringkas, null, 2),
+    [`${OUT_DIR}/${LABEL}.json`]: JSON.stringify(ringkas, null, 2),
   };
 }

@@ -101,8 +101,8 @@ Tidak perlu dipasang: Python, Visual Studio, VS Code, Docker, WSL, k6 (k6 berjal
 ## §2 Clone repo dan install
 
 ```powershell
-mkdir C:\mark0-server
-cd C:\mark0-server
+mkdir C:\Skripsi -Force
+cd C:\Skripsi
 git clone --branch upgrade/patch-deps-okt-2026 https://github.com/Montana-Labs/mark0.git
 cd mark0
 git log --oneline -1
@@ -114,7 +114,7 @@ cd react-ecommerce;  pnpm install --frozen-lockfile; cd ..
 
 > ⚠️ **Wajib pakai branch `upgrade/patch-deps-okt-2026`.** Branch `main` di GitHub masih berisi kode lama (tertinggal 45 commit per 15 Nov 2026), tanpa Next.js 16.4.3 dan tanpa perubahan penelitian. `git clone` biasa akan mengambil `main`.
 
-Taruh repo di path pendek tanpa spasi (misalnya `C:\mark0-server`), jangan di OneDrive. Sinkronisasi OneDrive bisa mengganggu disk I/O saat pengujian.
+Taruh repo di path pendek tanpa spasi (sekarang `C:\Skripsi`), jangan di OneDrive. Sinkronisasi OneDrive bisa mengganggu disk I/O saat pengujian.
 
 ---
 
@@ -137,7 +137,7 @@ Biarkan berjalan. Cek IP Mac dengan `ipconfig getifaddr en0`.
 **Di Windows** (PowerShell):
 
 ```powershell
-cd C:\mark0-server\mark0\api-middleware
+cd C:\Skripsi\mark0\api-middleware
 mkdir -Force public | Out-Null
 cd public
 curl.exe -O http://<IP-MAC>:8000/media.tar
@@ -148,7 +148,7 @@ del media.tar
 
 Angka terakhir harus **120**. Setelah itu tekan `Ctrl+C` di Terminal Mac untuk mematikan server berkas, lalu hapus `~/mark0-transfer`.
 
-Alternatif: salin folder `media` lewat flashdisk ke `C:\mark0-server\mark0\api-middleware\public\media`.
+Alternatif: salin folder `media` lewat flashdisk ke `C:\Skripsi\mark0\api-middleware\public\media`.
 
 ---
 
@@ -157,7 +157,7 @@ Alternatif: salin folder `media` lewat flashdisk ke `C:\mark0-server\mark0\api-m
 Buka **jendela PowerShell #1**:
 
 ```powershell
-cd C:\mark0-server\mark0\api-middleware
+cd C:\Skripsi\mark0\api-middleware
 pnpm build
 $env:NODE_ENV="production"
 $env:PORT="4000"
@@ -178,7 +178,7 @@ Biarkan jendela ini tetap terbuka.
 Buka **jendela PowerShell #2**. Middleware harus sudah jalan, karena build SSG mengambil data darinya.
 
 ```powershell
-cd C:\mark0-server\mark0\nextjs-ecommerce
+cd C:\Skripsi\mark0\nextjs-ecommerce
 $env:API_URL="http://<IP>:4000"
 $env:NEXT_PUBLIC_API_URL="http://<IP>:4000"
 $env:MEDIA_TIER="light"
@@ -197,7 +197,7 @@ Saat `pnpm build`, **simpan output tabel route-nya** (screenshot). `/ssg` harus 
 Buka **jendela PowerShell #3**:
 
 ```powershell
-cd C:\mark0-server\mark0\react-ecommerce
+cd C:\Skripsi\mark0\react-ecommerce
 $env:VITE_API_URL="http://<IP>:4000"
 $env:VITE_MEDIA_TIER="light"
 pnpm build
@@ -237,7 +237,7 @@ Semua harus `200`. Baris terakhir harus menampilkan `http://<IP>:4000/media/ligh
 Di PowerShell Windows:
 
 ```powershell
-$f = "C:\mark0-server\spesifikasi-server.txt"
+$f = "C:\Skripsi\spesifikasi-server.txt"
 "=== Spesifikasi server $(Get-Date -Format 'yyyy-MM-dd HH:mm') ===" | Out-File $f
 Get-CimInstance Win32_OperatingSystem | Select-Object Caption, Version, OSArchitecture | Format-List | Out-File $f -Append
 Get-CimInstance Win32_Processor | Select-Object Name, NumberOfCores, NumberOfLogicalProcessors, MaxClockSpeed | Format-List | Out-File $f -Append
@@ -278,7 +278,7 @@ Hanya perlu kalau Core Web Vitals juga diukur ulang di server lokal. Tier di-*ba
 | heavy | :3002 | :5002 |
 
 ```powershell
-cd C:\mark0-server\mark0
+cd C:\Skripsi\mark0
 robocopy nextjs-ecommerce nextjs-medium /E /XD .next
 robocopy react-ecommerce  react-medium  /E /XD dist
 ```
@@ -293,7 +293,7 @@ Middleware cukup satu, karena ia melayani ketiga tier.
 
 1. Ubah `scripts/run-k6.sh` supaya target URL bisa diarahkan ke `http://<IP>:…`. Sekarang URL Vercel masih tertulis langsung di script.
 2. Buat script PowerShell untuk monitoring RAM, CPU, dan bandwidth di Windows, berjalan paralel dengan k6 dan menyimpan hasilnya ke CSV.
-3. Putuskan tingkat VU (100 / 100+500) sesuai `BIMBINGAN_2_HASIL.md` §5.
+3. Tingkat VU sudah diputuskan: **100, 500, 1000** (lihat `BIMBINGAN_2_HASIL.md` §5; alasan pemilihan wajib ditulis di Batasan Masalah).
 4. Jalankan k6, lalu perbarui `KETERBATASAN.md` (keterbatasan Vercel tidak berlaku lagi).
 
 ---
