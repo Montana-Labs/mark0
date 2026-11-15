@@ -259,10 +259,12 @@ Salin isi `spesifikasi-server.txt` ke repo, misalnya ke `results/spesifikasi-ser
 - [ ] Charger tercolok, power plan High Performance
 - [ ] Windows Update di-*pause* (Settings → Windows Update → Pause updates)
 - [ ] Real-time protection Defender dimatikan sementara, **nyalakan lagi setelah selesai**
-- [ ] Semua aplikasi lain ditutup (browser, Discord, OneDrive, dan sebagainya)
+- [ ] Semua aplikasi lain ditutup (browser, Discord, OneDrive, dan sebagainya). **Termasuk Brave, Edge, aplikasi Orca, dan sesi Claude di Moona**: pada uji 15 Nov, tanpa k6 pun mereka sudah memakai ±55% CPU dan ±2,4 GB RAM (RAM tersisa <1 GB). Jalankan monitoring dan server langsung dari jendela PowerShell, bukan lewat sesi Claude
 - [ ] 3 jendela PowerShell (§3–§5) berjalan, verifikasi §6 lolos
 - [ ] Mac dan Windows di jaringan yang sama (kabel LAN kalau bisa)
-- [ ] Monitoring RAM dan bandwidth dinyalakan (script menyusul)
+- [ ] Monitoring dinyalakan: `powershell -ExecutionPolicy Bypass -File .\scripts\monitor-server.ps1` di jendela PowerShell ke-4 (baseline idle 1-2 menit sebelum k6, dan 2-3 menit sesudahnya)
+- [ ] Jam Mac dan Moona selaras (selisih < 2 detik): `date +%s` di Mac vs `[DateTimeOffset]::UtcNow.ToUnixTimeSeconds()` di Moona; jalankan `Start-Service w32time; w32tm /resync` di PowerShell Administrator kalau perlu
+- [ ] Kapasitas jaringan sudah diukur (iperf3) dan Mac + Moona di 5 GHz atau kabel
 - [ ] Laptop Windows **tidak disentuh** selama k6 berjalan
 
 ---
@@ -291,8 +293,8 @@ Middleware cukup satu, karena ia melayani ketiga tier.
 
 ## §10 Langkah berikutnya
 
-1. Ubah `scripts/run-k6.sh` supaya target URL bisa diarahkan ke `http://<IP>:…`. Sekarang URL Vercel masih tertulis langsung di script.
-2. Buat script PowerShell untuk monitoring RAM, CPU, dan bandwidth di Windows, berjalan paralel dengan k6 dan menyimpan hasilnya ke CSV.
+1. ~~Ubah `scripts/run-k6.sh` ke server lokal~~ Selesai: `scripts/run-k6-lokal.sh` (skrip Vercel dibiarkan utuh).
+2. ~~Script monitoring RAM, CPU, bandwidth~~ Selesai dan teruji di Moona: `scripts/monitor-server.ps1` (1 baris per detik ke CSV).
 3. Tingkat VU sudah diputuskan: **100, 500, 1000** (lihat `BIMBINGAN_2_HASIL.md` §5; alasan pemilihan wajib ditulis di Batasan Masalah).
 4. Jalankan k6, lalu perbarui `KETERBATASAN.md` (keterbatasan Vercel tidak berlaku lagi).
 
