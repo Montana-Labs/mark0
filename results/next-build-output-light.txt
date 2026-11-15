@@ -1,0 +1,40 @@
+# Output `pnpm build` Next.js (tier light) di server lokal Moona
+# Dicatat: 15 November 2026, Windows 11 (build 26300), Node v26.12.1, pnpm 11.1.2, Next.js 16.4.3
+# Fungsi: bukti strategi rendering untuk Bab 4 (menggantikan bukti header x-vercel-cache di Vercel).
+#   ○ /ssg = statis (SSG), ƒ /ssr = dinamis (SSR), ○ /csr = statis (kerangka CSR).
+# Catatan penyalinan: enam baris awal berupa derau PowerShell 5.1 yang membungkus stderr pnpm
+# (bukan error build; build berakhir exit 0) dibuang. Isi selebihnya disalin apa adanya dari
+# C:\Skripsi\next-build-output-light.txt (Moona).
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 34.8s
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 19.1s
+  Running TypeScript ...
+  Finished TypeScript in 12.3s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/7) ...
+  Generating static pages using 3 workers (1/7)
+  Generating static pages using 3 workers (3/7)
+  Generating static pages using 3 workers (5/7)
+✓ Generating static pages using 3 workers (7/7) in 2.6s
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /cart
+├ ○ /csr
+├ ƒ /product/[id]
+├ ○ /ssg
+└ ƒ /ssr
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

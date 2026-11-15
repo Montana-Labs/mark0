@@ -1,0 +1,42 @@
+=== Spesifikasi server load testing (Moona) ===
+Dicatat: 2026-11-15 11:26 (waktu Windows, UTC), runbook LANGKAH_SERVER_WINDOWS.md §7
+Sumber: C:\Skripsi\spesifikasi-server.txt di mesin Moona (disalin manual)
+
+Sistem operasi
+  Caption        : Microsoft Windows 11 Home Single Language
+  Version        : 10.0.26300
+  OSArchitecture : 64-bit
+
+Prosesor
+  Name                      : Intel(R) Pentium(R) Silver N6000 @ 1.10GHz
+  NumberOfCores             : 4
+  NumberOfLogicalProcessors : 4
+  MaxClockSpeed             : 1114 MHz
+
+Memori
+  RAM (GB): 7.7
+
+Penyimpanan
+  KINGSTON OM3PDP3256B-AB, SSD, 256060514304 byte (±238 GB)
+
+Jaringan (aktif)
+  Wi-Fi : Intel(R) Wi-Fi 6 AX201 160MHz, LinkSpeed 180 Mbps
+  Tidak ada adapter Ethernet aktif (perangkat tidak punya port LAN).
+  Profil jaringan: (nama jaringan rumah disamarkan) kategori Private
+  IPv4: 192.168.18.15/24 (DHCP; reservasi di router belum dikonfirmasi)
+  Band Wi-Fi (2,4 atau 5 GHz): BELUM DIPERIKSA
+
+Perangkat lunak
+  node : v26.12.1
+  pnpm : 11.1.2
+  next : 16.4.3
+  serve: serve@14 (menyajikan build statis React)
+
+Pengaturan daya
+  Skema: High performance (sleep AC = 0, hibernate AC = 0, layar AC = 0)
+  Catatan: saat pencatatan, charger BELUM tercolok (baterai 8%).
+
+Catatan
+  - Pencatatan band Wi-Fi via "netsh wlan show interfaces" gagal (butuh Location
+    services dan hak Administrator). Isi bagian "Band Wi-Fi" setelah dicek manual.
+  - Klien pengujian: Mac (Apple M1), k6 v2.3.0, tersambung ke jaringan yang sama.
