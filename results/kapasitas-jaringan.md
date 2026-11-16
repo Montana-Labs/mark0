@@ -30,6 +30,40 @@ Kesimpulan sementara: pada jaringan 2,4 GHz ini, hasil SSG dan SSR di 100 VU ke 
 kemungkinan mengukur kapasitas Wi-Fi, bukan kapasitas server. Perkiraan memakai asumsi
 server sanggup melayani semua request dan ukuran respons sama dengan data Vercel.
 
-## Pengukuran 2: SESUDAH pindah ke 5 GHz / kabel
+## Pengukuran 2: SESUDAH pindah ke 5 GHz (dicatat 2026-11-16T17:22Z)
 
-(belum dilakukan)
+Kondisi: Mac dan Moona di SSID 5 GHz (Mac: 802.11ac, channel 149, 80 MHz, transmit rate 390-650 Mbps;
+Moona: 802.11ac, LinkSpeed berfluktuasi 87-173 Mbps selama sesi). Profil jaringan Moona diubah dari
+Public ke Private agar aturan firewall berlaku. Moona tercolok charger.
+
+| Arah | Durasi | Hasil (receiver) |
+|---|---|---|
+| Moona -> Mac (-R, arah respons yang dipakai k6) | 20 d | 66,8 Mbps |
+| Moona -> Mac (-R) | 10 d | 47-88 Mbps per detik, rata-rata ~65 Mbps |
+| Moona -> Mac (-R, 4 aliran paralel) | 10 d | 63,1 Mbps |
+| Mac -> Moona | 20 d | 4,2 Mbps |
+| Mac -> Moona (ulangan) | 10 d | 4,4 Mbps (stabil ~4,2 Mbps per detik, 0 retransmisi) |
+| Mac -> Moona (4 aliran paralel) | 10 d | 4,4 Mbps |
+
+Perbandingan dengan 2,4 GHz (Pengukuran 1): arah respons naik dari ~30 Mbps menjadi ~65 Mbps (sekitar 2 kali lipat).
+
+Catatan:
+- Pembatas utama adalah sambungan Wi-Fi Moona (LinkSpeed 87-173 Mbps), bukan Mac (650 Mbps).
+- Arah Mac -> Moona hanya ~4 Mbps dan stabil (bukan gangguan sesaat); penyebabnya belum diketahui.
+  Untuk k6 arah ini hanya membawa permintaan kecil (kebutuhan di 1000 VU <3 Mbps), jadi tidak
+  menjadi pembatas, tetapi anomali ini perlu dicatat.
+
+## Perbandingan kebutuhan dengan kapasitas arah respons (~65 Mbps)
+
+| Kondisi | 100 VU | 500 VU | 1000 VU |
+|---|---|---|---|
+| CSR-React (~0,7 KB) | ~0,4 Mbps, aman | ~2 Mbps, aman | ~4 Mbps, aman |
+| CSR-Next (~8 KB) | ~5 Mbps, aman | ~26 Mbps, aman | ~52 Mbps, mendekati batas |
+| SSG / SSR (~49 KB) | ~31 Mbps, aman (kapasitas ~2 kali) | ~155 Mbps, melebihi batas | ~310 Mbps, melebihi batas |
+
+(Perkiraan linear dari data Vercel 100 VU, dengan asumsi server mampu melayani semua request. Jika CPU
+Moona jenuh lebih dulu, trafik nyata lebih rendah.)
+
+Kesimpulan sementara: 100 VU layak untuk keempat kondisi pada jaringan ini. SSG dan SSR pada 500 dan
+1000 VU akan dibatasi jaringan; untuk membuktikan batas server sebenarnya perlu sambungan kabel
+(adaptor USB-C ke Ethernet gigabit) pada Moona.
