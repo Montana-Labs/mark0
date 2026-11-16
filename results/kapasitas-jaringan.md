@@ -67,3 +67,18 @@ Moona jenuh lebih dulu, trafik nyata lebih rendah.)
 Kesimpulan sementara: 100 VU layak untuk keempat kondisi pada jaringan ini. SSG dan SSR pada 500 dan
 1000 VU akan dibatasi jaringan; untuk membuktikan batas server sebenarnya perlu sambungan kabel
 (adaptor USB-C ke Ethernet gigabit) pada Moona.
+
+## Pengukuran 3: setelah Moona didekatkan ke router (dicatat 2026-11-16T17:26Z)
+
+Aturan iperf3 sudah dihapus, jadi diukur lewat HTTP (unduh vid-09.mp4, 21,2 MB, dari middleware Moona;
+arah Moona -> Mac, sama dengan arah respons k6). Mac tetap di 5 GHz channel 149 (transmit rate 468 Mbps).
+
+| Pengukuran | Hasil |
+|---|---|
+| Satu aliran (3 kali) | 67,6 / 74,8 / 73,9 Mbps |
+| 4 aliran paralel (total) | 77,4 Mbps |
+
+Dibanding sebelum didekatkan (iperf3 -R: ~65 Mbps, 4 aliran 63 Mbps), kapasitas naik sekitar 10-20%.
+Pengukuran HTTP ikut membawa overhead Node di Moona, sehingga batas jaringan sebenarnya bisa sedikit lebih
+tinggi. Kesimpulannya tetap: kapasitas arah respons ~75-80 Mbps, jauh di bawah kebutuhan SSG/SSR
+di 500 VU (~155 Mbps) dan 1000 VU (~310 Mbps). 100 VU layak untuk keempat kondisi.
