@@ -1,0 +1,15 @@
+{
+  "label": "ssg_light_1000vu",
+  "url": "http://192.168.18.15:3000/ssg",
+  "vus": 1000,
+  "total_requests": 9068,
+  "throughput_rps": 96.16298756811301,
+  "duration_avg_ms": 4851.24788586237,
+  "duration_med_ms": 1654.798,
+  "duration_p95_ms": 22282.885749999998,
+  "duration_p99_ms": 48476.90046,
+  "duration_max_ms": 60031.896,
+  "http_error_rate": 0.0066166740185266875,
+  "sla_breach_rate": 0.3406484340538156,
+  "data_received_bytes": 447277508
+}
