@@ -75,6 +75,24 @@ for VU in $VU_LEVELS; do
   echo "$CELLS" | while IFS='|' read -r NAMA URL; do
     [ -z "$NAMA" ] && continue
     LABEL="${NAMA}_${TIER}_${VU}vu"
+
+    # Pastikan server masih hidup sebelum tiap pengujian. Kalau tumbang (mis. kehabisan
+    # memori pada beban tinggi), tunggu sampai 60 detik; kalau tetap mati, lewati dan catat
+    # kode 98 di run-log.csv supaya tidak ada data sampah yang tampak seperti hasil valid.
+    HIDUP=0
+    for _ in 1 2 3 4 5 6; do
+      K=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$URL" || true)
+      [ "$K" = "200" ] && { HIDUP=1; break; }
+      echo "  $LABEL: target belum membalas 200 (kode $K), tunggu 10 detik..." >&2
+      sleep 10
+    done
+    if [ "$HIDUP" -ne 1 ]; then
+      echo "  $LABEL: DILEWATI, server tidak pulih dalam 60 detik" >&2
+      N=$(date +%s); NI=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+      echo "$LABEL,$VU,$URL,$N,$N,$NI,$NI,98" >> "$LOG"
+      continue
+    fi
+
     MULAI=$(date +%s); MULAI_ISO=$(date -u +%Y-%m-%dT%H:%M:%SZ)
     KODE=0
     VUS="$VU" HOLD="$HOLD" TARGET_URL="$URL" LABEL="$LABEL" OUT_DIR="$OUT" \
