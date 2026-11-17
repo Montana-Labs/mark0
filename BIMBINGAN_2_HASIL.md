@@ -93,3 +93,12 @@ Bukti 100 VU yang sudah ada: `results/k6-valid/*_light_100vu.json` (target Verce
 ---
 
 **Terakhir diperbarui:** 9 November 2026
+
+---
+
+## Update 17 November 2026 (setelah bimbingan 2)
+
+Server lokal (Moona) sudah dipakai untuk k6 100/500/1000 VU, lewat Wi-Fi (16 Nov) dan lewat kabel (17 Nov), lengkap dengan
+monitoring RAM, bandwidth, dan CPU per proses node. Ringkasan: `results/ringkasan-k6-lokal.md`, `results/ringkasan-k6-kabel.md`,
+catatan harian: `results/catatan-harian-2026-11-17.md`. Temuan: SSR dibatasi satu proses Node; SSG 500/1000 VU terbatas jaringan.
+Item yang masih terbuka: pustaka 4 metrik k6 + jurnal SLA, argumen JPG/MP4, rombak Bab 1 dan 3, Bab 5, slide.
