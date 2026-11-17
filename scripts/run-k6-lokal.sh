@@ -26,7 +26,7 @@ VU_LEVELS="${VU_LEVELS:-100 500 1000}"
 HOLD="${HOLD:-45s}"
 COOLDOWN="${COOLDOWN:-45}"
 TIER="${TIER:-light}"          # hanya label berkas; tier ditentukan saat build di server
-OUT="$ROOT/results/k6-lokal"
+OUT="${OUT:-$ROOT/results/k6-lokal}"
 LOG="$OUT/run-log.csv"
 mkdir -p "$OUT"
 

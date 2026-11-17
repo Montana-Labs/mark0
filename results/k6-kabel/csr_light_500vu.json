@@ -1,0 +1,15 @@
+{
+  "label": "csr_light_500vu",
+  "url": "http://192.168.0.105:5000/",
+  "vus": 500,
+  "total_requests": 25722,
+  "throughput_rps": 391.1601516293808,
+  "duration_avg_ms": 77.90312518466689,
+  "duration_med_ms": 59.5615,
+  "duration_p95_ms": 221.40575,
+  "duration_p99_ms": 266.19232,
+  "duration_max_ms": 322.739,
+  "http_error_rate": 0,
+  "sla_breach_rate": 0,
+  "data_received_bytes": 18288342
+}

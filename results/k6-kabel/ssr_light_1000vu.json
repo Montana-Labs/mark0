@@ -1,0 +1,15 @@
+{
+  "label": "ssr_light_1000vu",
+  "url": "http://192.168.0.105:3000/ssr",
+  "vus": 1000,
+  "total_requests": 5408,
+  "throughput_rps": 74.59192438144356,
+  "duration_avg_ms": 9481.574895710028,
+  "duration_med_ms": 8718.1595,
+  "duration_p95_ms": 25636.443499999998,
+  "duration_p99_ms": 34291.205760000004,
+  "duration_max_ms": 37696.878,
+  "http_error_rate": 0.002403846153846154,
+  "sla_breach_rate": 0.9393491124260355,
+  "data_received_bytes": 260173769
+}
