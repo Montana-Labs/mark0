@@ -16,6 +16,12 @@
     net_rx_mbps      trafik masuk ke server, jumlah semua adapter (Mbps)
     net_tx_mbps      trafik keluar dari server (Mbps)
     tcp_established  jumlah koneksi TCP ESTABLISHED
+    node_top_core_pct  CPU proses node.exe TERSIBUK, dalam % dari SATU inti
+                     (100 = satu inti penuh). Nilai ~100 berarti proses itu
+                     jenuh walau CPU total terlihat rendah (Node satu thread).
+    node_top_port    port yang didengarkan proses tersibuk itu (3000 Next.js,
+                     4000 middleware, 5000 React/serve); kosong bila tidak ada
+    node_sum_core_pct  jumlah CPU semua proses node.exe (% dari satu inti)
     monitor_cpu_pct  beban CPU skrip ini sendiri, dalam % dari kapasitas CPU
                      total (supaya pencemaran pengukur bisa dikurangkan/dilaporkan)
 
@@ -113,7 +119,7 @@ $cores = [Environment]::ProcessorCount
 # --- berkas keluaran (tetap terbuka, tiap baris langsung ditulis ke disk) ---
 $writer = New-Object System.IO.StreamWriter($Out, $false, [Text.Encoding]::ASCII)
 $writer.AutoFlush = $true
-$writer.WriteLine("epoch,iso_utc,cpu_pct,cpu_perf_pct,mem_avail_mb,mem_used_mb,node_ws_mb,net_rx_mbps,net_tx_mbps,tcp_established,monitor_cpu_pct")
+$writer.WriteLine("epoch,iso_utc,cpu_pct,cpu_perf_pct,mem_avail_mb,mem_used_mb,node_ws_mb,net_rx_mbps,net_tx_mbps,tcp_established,node_top_core_pct,node_top_port,node_sum_core_pct,monitor_cpu_pct")
 
 Write-Host "Monitoring dimulai. Berkas : $Out"
 Write-Host "RAM total   : $totalMB MB     Selang: $IntervalSec detik     Adapter jaringan: $($nicRx.Count)"
@@ -123,6 +129,19 @@ Write-Host "Hentikan dengan Ctrl+C."
 $null = Read-Pc $pcCpu; $null = Read-Pc $pcPerf; $null = Read-Pc $pcAvail; $null = Read-Pc $pcTcp
 foreach ($c in $nicRx) { $null = Read-Pc $c }
 foreach ($c in $nicTx) { $null = Read-Pc $c }
+
+# peta PID node -> port yang didengarkan (dibuat sekali; node tidak berganti PID selama tes)
+$portOf = @{}
+try {
+  Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
+    Where-Object { $_.LocalPort -in 3000,4000,5000 } |
+    ForEach-Object { $portOf[[int]$_.OwningProcess] = $_.LocalPort }
+} catch { Write-Warning "Peta PID->port gagal dibuat; node_top_port dikosongkan" }
+foreach ($k in $portOf.Keys) { Write-Host "  node PID $k -> port $($portOf[$k])" }
+$lastProcCpu = @{}
+foreach ($p in (Get-Process node -ErrorAction SilentlyContinue)) {
+  try { $lastProcCpu[$p.Id] = $p.TotalProcessorTime.TotalMilliseconds } catch {}
+}
 
 $sw = [Diagnostics.Stopwatch]::StartNew()
 $proc.Refresh()
@@ -154,8 +173,26 @@ try {
       $tx = $sum * 8 / 1e6
     }
 
-    $ws = (Get-Process node -ErrorAction SilentlyContinue | Measure-Object WorkingSet64 -Sum).Sum
+    $nodes = @(Get-Process node -ErrorAction SilentlyContinue)
+    $ws = ($nodes | Measure-Object WorkingSet64 -Sum).Sum
     if ($null -eq $ws) { $ws = 0 }
+
+    # CPU per proses node: selisih TotalProcessorTime / selang nyata (100 = satu inti penuh)
+    $dtMs = $sw.ElapsedMilliseconds - $lastT
+    $topPct = 0.0; $topPid = $null; $sumPct = 0.0
+    foreach ($p in $nodes) {
+      try {
+        $t = $p.TotalProcessorTime.TotalMilliseconds
+        if ($lastProcCpu.ContainsKey($p.Id) -and $dtMs -gt 0) {
+          $pct = (($t - $lastProcCpu[$p.Id]) / $dtMs) * 100
+          $sumPct += $pct
+          if ($pct -gt $topPct) { $topPct = $pct; $topPid = $p.Id }
+        }
+        $lastProcCpu[$p.Id] = $t
+      } catch {}
+    }
+    $topPort = ''
+    if ($null -ne $topPid -and $portOf.ContainsKey([int]$topPid)) { $topPort = $portOf[[int]$topPid] }
     $nodeMB = $ws / 1MB
 
     $used = $null
@@ -178,14 +215,15 @@ try {
       (Fmt $avail '0'), (Fmt $used '0'), (Fmt $nodeMB '0.0'),
       (Fmt $rx '0.00'), (Fmt $tx '0.00'),
       (Fmt $tcp '0'),
+      (Fmt $topPct '0'), $topPort, (Fmt $sumPct '0'),
       (Fmt $own '0.00')
     ) -join ','
     $writer.WriteLine($line)
 
     $n++
     if ($n % 30 -eq 0) {
-      Write-Host ("{0}  cpu={1}%  ram_terpakai={2}MB  node={3}MB  rx={4}Mbps  tx={5}Mbps  tcp={6}  skrip={7}%" -f `
-        $now.UtcDateTime.ToString('HH:mm:ss'), (Fmt $cpu '0'), (Fmt $used '0'), (Fmt $nodeMB '0'), (Fmt $rx '0.0'), (Fmt $tx '0.0'), (Fmt $tcp '0'), (Fmt $own '0.0'))
+      Write-Host ("{0}  cpu={1}%  ram_terpakai={2}MB  node={3}MB  rx={4}Mbps  tx={5}Mbps  tcp={6}  skrip={7}%  nodeTop={8}%@{9}" -f `
+        $now.UtcDateTime.ToString('HH:mm:ss'), (Fmt $cpu '0'), (Fmt $used '0'), (Fmt $nodeMB '0'), (Fmt $rx '0.0'), (Fmt $tx '0.0'), (Fmt $tcp '0'), (Fmt $own '0.0'), (Fmt $topPct '0'), $topPort)
     }
   }
 }
