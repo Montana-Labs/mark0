@@ -60,3 +60,20 @@ ambang waktu tunggu pengguna (turunan dari Nah 2004 dan Galletta dkk. 2004).
 Yang masih lemah (butuh jurnal sebelum dipakai): alasan PNG, AVI, RAW tidak umum untuk e-commerce (klaim "lossless besar, jarang
 dipakai"). Selama belum ada jurnalnya, jangan menulis klaim itu; cukup alasan pengendalian variabel di atas.
 Catatan: load test k6 hanya mengunduh HTML, jadi format media memengaruhi hasil Lighthouse/CWV, bukan k6.
+
+## E. Empat PDF dari Downloads (dibaca 19 November 2026) dan keputusan pemakaian
+
+Keempatnya memakai **JMeter**, bukan k6 (alat berbeda, metrik sama); tulis begitu di Bab 2.
+
+| Jurnal | Isi yang terverifikasi (dibaca) | Keputusan |
+|---|---|---|
+| Hermanto, R. R., & Engel, M. M. (2025). Analisis komparatif kinerja Next.js, Nuxt.js, dan Remix.js dalam implementasi SSR website berita. *TIN: Terapan Informatika Nusantara*, 6(5), 450-463. DOI 10.47065/tin.v6i5.8315 | Next.js SSR; Lighthouse + JMeter 250/500/1000 VU; response time, throughput, error rate | **Utama** (topik paling dekat; dasar 500/1000 VU) |
+| Yuwono, J. (2026). Analisis kinerja sistem e-learning Universitas Pamulang menggunakan load testing berbasis Apache JMeter. *Jurnal Informatika dan Teknologi Komputer (JITEK)*, 6(1), 53-66. DOI 10.55606/jitek.v6i1.8599 | 100-1000 pengguna; response time, throughput, tingkat kegagalan; CPU/memori/network; menyatakan respons <2-3 detik umumnya dianggap baik (merujuk Nielsen 1993, sebuah buku); titik kritis 300-500 pengguna | **Utama** (metrik + dasar ambang 3 detik + rentang VU) |
+| Annisa, A. R., Ardiana, M., Rahayu, P. N., Brian, T., & Jami'in, M. A. (2026). Performance evaluation of web applications using JMeter load testing for server capacity and response efficiency. *Journal of Applied Informatics and Computing (JAIC)*, 10(1), 585-590. e-ISSN 2548-6861 | 50-5000 pengguna; response time, error rate, throughput, **bandwidth**; batas kemampuan server ditemukan di ~300 pengguna | **Utama** (bandwidth = permintaan Bu Nila; pola mencari titik jenuh) |
+| Ginasari, N. L. A. S., Wibawa, K. S., & Wirdiani, N. K. A. (2021). Pengujian stress testing API sistem pelayanan dengan Apache JMeter. *JITTER*, 2(3). | Hanya 25-75 sampel, API Android; tidak ada CPU/memori | **Cadangan/dibuang**: skala kecil, topik API, 5 tahun |
+
+Koreksi pada bagian B nomor 3: **Yuwono (2026) menyebut ambang 2-3 detik**, jadi ambang 3 detik punya rujukan jurnal langsung
+(dengan catatan sumber aslinya buku Nielsen, jadi tulis "Yuwono, 2026, mengutip Nielsen, 1993" dan topang dengan Nah 2004 dan Galletta dkk. 2004
+yang merupakan eksperimen).
+Peluang telusur: Yuwono mengutip Gunasekaran & Kannan (2012), *International Journal of Computer Science and Engineering Technology*, 3(1), 38-44
+sebagai sumber metrik (response time, throughput, CPU/memori, kegagalan). Belum dibuka; cari naskahnya dulu sebelum dikutip.
