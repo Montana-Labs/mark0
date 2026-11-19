@@ -20,7 +20,7 @@ dengan pemantauan RAM, CPU, bandwidth, dan CPU per proses Node. Pustaka untuk me
 | 3 | Pemantauan server tiap 1 detik: CPU, RAM, bandwidth, koneksi TCP, dan CPU per proses Node (sesuai permintaan Bu Nila: RAM dan bandwidth) | Selesai |
 | 4 | k6 100/500/1000 VU x 4 kondisi lewat Wi-Fi 5 GHz (16 Nov) | Selesai |
 | 5 | Pengukuran kapasitas jaringan (iperf3) dan pengulangan seluruh pengujian lewat kabel Ethernet (17 Nov) | Selesai |
-| 6 | Penelusuran pustaka: jurnal untuk metrik k6 dan ambang waktu tunggu, argumen pembatasan JPG dan MP4 | Sebagian |
+| 6 | Penelusuran pustaka: tiga jurnal utama untuk metrik load testing (Hermanto & Engel 2025; Yuwono 2026; Annisa dkk. 2026), jurnal ambang waktu tunggu (Nah 2004; Galletta dkk. 2004), argumen pembatasan JPG dan MP4 | Sebagian (Oktafianto 2025 dan jurnal "SLA breach rate" belum ketemu) |
 | 7 | Seluruh skrip, data, dan ringkasan tersimpan di repositori dan catatan | Selesai |
 
 ## 3. Hasil utama (k6 lewat kabel, server lokal)
@@ -63,14 +63,14 @@ dengan pemantauan RAM, CPU, bandwidth, dan CPU per proses Node. Pustaka untuk me
 | Monitoring awal hanya mencatat CPU total, sehingga pembatas SSR tidak terbukti | Dugaan "Node satu thread" belum teruji | Ditambah CPU per proses Node; dugaan terbukti pada pengujian kabel |
 | Server sempat mati sekali di tengah sesi dan laptop berjalan dengan baterai | Data berisiko rusak | Skrip melewati dan mencatat pengujian yang server-nya tumbang; charger wajib tercolok |
 | Jurnal acuan metrik: Hanggara tercantum 2022 di paper lain, ternyata 2024; Oktafianto (2025) belum bisa dibuka | Risiko salah kutip | Hanya jurnal yang sudah dibuka yang dipakai; yang belum dibuka ditandai |
-| Tidak ada jurnal yang menyebut ambang tepat 3 detik | Ambang SLA 3 detik belum punya rujukan langsung | Dirumuskan sebagai ambang operasional di antara Nah (2004, ~2 detik) dan Galletta dkk. (2004, ~4 detik) |
+| Ambang SLA 3 detik butuh rujukan jurnal | Awalnya hanya buku (Nielsen 1993) yang menyebut ambang ini | Ditemukan Yuwono (2026, JITEK 6(1)): respons <2-3 detik dianggap baik; ditopang eksperimen Nah (2004, ~2 detik) dan Galletta dkk. (2004, mendatar ~4 detik) |
 | Data per pengujian baru satu kali jalan | Variasi antar-ulangan belum terukur | Dicatat sebagai keterbatasan; pengulangan jika waktu cukup |
 
 ## 5. Pertanyaan untuk Pak Dito
 
 1. SSG 500/1000 VU terbatas jaringan (kabel 100 Mbps). Cukupkah dituliskan sebagai **keterbatasan terbukti** (trafik = kapasitas kabel, Node hanya ~55%),
    atau perlu diulang dengan adaptor gigabit?
-2. Ambang SLA 3 detik: apakah boleh ditulis sebagai **ambang operasional** yang dibatasi dua jurnal (2 dan 4 detik), karena tidak ada jurnal yang menyebut tepat 3 detik?
+2. Ambang SLA 3 detik: apakah boleh ditulis sebagai **ambang operasional** berdasarkan Yuwono (2026; respons <2-3 detik dianggap baik, mengutip Nielsen) dan ditopang eksperimen Nah (2004) dan Galletta dkk. (2004)?
 3. Satu pengujian per sel (belum ada pengulangan): cukup untuk 100 VU dan temuan arah (SSR tersaturasi satu proses Node), atau perlu 3 kali ulangan?
 4. Argumen pembatasan JPG dan MP4: apakah alasan "mengendalikan variabel ukuran media, bukan algoritma kompresi" sudah memadai (draf di `PUSTAKA_DAN_ARGUMEN.md`)?
 5. Hasil ini menggambarkan satu mesin 4 inti dengan satu proses Node per layanan. Apakah perlu dicatat eksplisit bahwa produksi dengan banyak proses (cluster/PM2) dapat berbeda?
