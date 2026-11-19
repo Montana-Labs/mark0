@@ -36,7 +36,7 @@ Salin dari kolokium bagian 3, dengan **tiga penyesuaian wajib**:
 |---|---|---|
 | 2 | menyebut LCP, FCP, TBT, SI, CLS sebagai "Core Web Vitals" | 🔄 FCP, TBT, SI bukan Core Web Vitals. Tulis: CWV utama **LCP dan CLS**; FCP, TBT, SI, TTI sebagai **metrik performa Lighthouse pendukung**. Nyatakan **INP tidak diukur** karena memerlukan field data |
 | 5 | React 19.2, Next.js 16.2.1 | 🔄 versi aktual: React **19.2.4**, Next.js **16.4.3** |
-| — | — | 🔄 tambahkan batasan baru: pengujian beban hanya sampai **100 pengguna virtual** (alasan di 3.8) |
+| — | — | 🔄 tambahkan batasan baru: pengujian beban sisi server dijalankan pada **server lokal** dengan 100/500/1000 pengguna virtual, hanya **tier light** dan hanya mengunduh **dokumen HTML**; hasil SSG pada 500 dan 1000 pengguna virtual **terbatas kapasitas jaringan** (alasan di 3.8). Pengujian awal di Vercel hanya sah sampai 100 pengguna virtual |
 
 ## 1.4 Tujuan Penelitian
 Salin dari kolokium bagian 4.
@@ -146,6 +146,17 @@ Enam puluh dari enam puluh berkas masuk rentang target. Ketiga tier dihasilkan d
 
 Mode Lighthouse memakai pengaturan bawaan: emulasi perangkat mobile dengan throttling jaringan tersimulasi.
 
+🔄 **Lingkungan pengujian beban sisi server (RQ3).** Dijalankan pada server lokal, bukan Vercel (alasan di 3.8):
+
+| Komponen | Keterangan |
+|---|---|
+| Server | Laptop Windows "Moona": Intel Pentium Silver N6000, 4 inti, 7,75 GB RAM |
+| Proses | Middleware (port 4000), Next.js `next start` (3000, build produksi), React hasil build disajikan `serve@14` (5000) |
+| Klien k6 | Mac M1, k6 2.3.0, tersambung lewat jaringan lokal (satu subnet) |
+| Jaringan, pengujian 1 (16 Nov 2026) | Wi-Fi 5 GHz; kapasitas arah respons terukur (iperf3) sekitar 75-80 Mbps |
+| Jaringan, pengujian 2 (17 Nov 2026) | Kabel Ethernet lewat adaptor USB 100 Mbps; kapasitas terukur (iperf3) sekitar 93 Mbps kedua arah |
+| Pemantauan server | Skrip PowerShell, 1 baris per detik: CPU total, CPU per proses Node, RAM, bandwidth, koneksi TCP |
+
 ## 3.6 Arsitektur Sistem Uji
 
 ✍️ **TULIS SENDIRI + sertakan diagram.** Jelaskan alur: browser → aplikasi (Vercel sin1) → API middleware → snapshot data + aset media. Tekankan bahwa keempat aplikasi mengambil data dari satu middleware yang sama.
@@ -154,13 +165,16 @@ Mode Lighthouse memakai pengaturan bawaan: emulasi perangkat mobile dengan throt
 
 **Pengujian sisi klien.** Setiap sel diukur 15 kali menggunakan Lighthouse pada mode produksi. Berkas hasil mentah tiap pengukuran disimpan terpisah agar simpangan baku dapat dihitung. Cache middleware dihangatkan sebelum setiap rangkaian pengujian.
 
-**Pengujian sisi server.** Load testing menggunakan k6 dengan pengukuran terpisah per tingkat beban pengguna, bukan satu tanjakan panjang.
+**Pengujian sisi server.** Load testing menggunakan k6 dengan pengukuran terpisah per tingkat beban pengguna (100, 500, 1000), bukan satu tanjakan panjang. Setiap pengujian: naik 15 detik, tahan 45 detik, turun 5 detik, jeda 45 detik antar pengujian; tiap pengguna virtual meminta halaman lalu menunggu 1 detik. Empat kondisi diuji berurutan pada tiap tingkat. Error rate (respons berstatus bukan 200) dan SLA breach (respons lebih lama dari 3 detik) dihitung terpisah. Setiap sel baru dijalankan satu kali per pengujian jaringan.
 
 🔄 **Pembatasan cakupan:** k6 hanya mengunduh dokumen HTML, tidak mengunduh gambar. Pengujian beban karena itu mengukur biaya generasi dokumen di sisi server, sedangkan pengaruh variasi beban media berada di sisi klien dan diukur terpisah melalui Lighthouse. Pengujian beban hanya dijalankan pada satu tier.
 
-## 3.8 🔄 Keterbatasan Pengujian Beban
+## 3.8 🔄 Pengujian Beban: Dari Vercel ke Server Lokal dan Keterbatasannya
 
-Kolokium menjanjikan pengujian pada 100, 500, dan 1000 pengguna virtual. Yang berhasil diukur secara sah hanya **100 pengguna virtual**.
+### 3.8.1 Pengujian awal di Vercel dan alasan pindah
+
+
+Kolokium menjanjikan pengujian pada 100, 500, dan 1000 pengguna virtual. Yang berhasil diukur secara sah di Vercel hanya **100 pengguna virtual**.
 
 Pada beban yang lebih tinggi, mitigasi DDoS otomatis platform mulai menghadang request dengan halaman verifikasi, sehingga yang terukur bukan lagi kapasitas aplikasi melainkan ambang perlindungan platform.
 
@@ -171,6 +185,16 @@ Pada beban yang lebih tinggi, mitigasi DDoS otomatis platform mulai menghadang r
 3. Header respons menunjukkan `x-vercel-mitigated: challenge` dan dasbor firewall mencatat 100.300 request berstatus *challenge* berbanding 50.500 *allow*.
 
 Pengecualian alamat IP pengujian hanya tersedia pada plan berbayar.
+
+**Penyelesaian.** Atas arahan Dosen Pembimbing (bimbingan 1, 5 November 2026) dan persetujuan bimbingan 2 (9 November 2026), pengujian beban dipindahkan ke server fisik milik sendiri lewat jaringan lokal sehingga 500 dan 1000 pengguna virtual dapat diuji tanpa mitigasi platform. Hasil Vercel pada 100 pengguna virtual dipertahankan sebagai pembanding.
+
+### 3.8.2 Keterbatasan pengujian di server lokal
+
+1. 🔴 **SSG pada 500 dan 1000 pengguna virtual terbatas jaringan, bukan server.** Trafik keluar server mencapai 95-96 Mbps, sama dengan kapasitas kabel terukur (sekitar 93 Mbps), sedangkan proses Node hanya sekitar 55% dari satu inti. Halaman SSG berukuran sekitar 49 KB, sehingga pada 216 permintaan per detik kabel 100 Mbps penuh. Hasil SSG pada kedua tingkat ini tidak boleh dibaca sebagai kapasitas server. Pada Wi-Fi 5 GHz keterbatasan yang sama muncul pada kapasitas sekitar 75-80 Mbps.
+2. **Satu mesin berkemampuan rendah dan satu proses Node per layanan.** Hasil menggambarkan perilaku pada konfigurasi ini (4 inti, tanpa cluster/PM2), bukan produksi dengan banyak proses atau inti.
+3. **Satu kali jalan per sel** pada tiap pengujian jaringan; variasi antar ulangan belum terukur.
+4. **k6 hanya mengunduh dokumen HTML** (tidak termasuk gambar dan video), dan hanya pada tier media light; pengaruh variasi media diukur melalui Lighthouse.
+5. **Lingkungan jaringan lokal berbeda dari internet**; selisih latensi antara pengujian lokal dan Vercel tidak boleh dibandingkan sebagai selisih strategi.
 
 ## 3.9 Metode Analisis Data
 
@@ -363,20 +387,49 @@ CSR-Next menggunakan `next/dynamic` dengan `ssr: false`, sehingga HTML yang diki
 
 ## 4.6 Hasil Pengujian Beban Sisi Server
 
-Diukur pada 100 pengguna virtual simultan, tier light, tanpa kegagalan.
+Sumber data: `results/ringkasan-k6-kabel.md` (utama), `results/ringkasan-k6-lokal.md` (Wi-Fi, pembanding), `results/k6-valid/` (Vercel, 100 VU). Tier light.
 
-| Strategi | Throughput | Rata-rata | Median | p95 | Maks | Error rate | SLA breach |
-|---|---|---|---|---|---|---|---|
-| CSR-React | 79 req/s | **51 ms** | 44 ms | 77 ms | 276 ms | 0,00% | 0,00% |
-| CSR-Next | 80 req/s | 51 ms | 45 ms | 72 ms | 361 ms | 0,00% | 0,00% |
-| SSG-Next | 76 req/s | 109 ms | 102 ms | 173 ms | 788 ms | 0,00% | 0,00% |
-| SSR-Next | 70 req/s | **200 ms** | 153 ms | 501 ms | 1.963 ms | 0,00% | 0,00% |
+### 4.6.1 Server lokal, kabel Ethernet (17 November 2026)
 
-**Error rate** = persentase respons berstatus bukan 200. **SLA breach** = persentase respons melebihi 3 detik. Keduanya dipisahkan karena respons yang lambat tidak berarti server gagal.
+| VU | Strategi | Throughput | Rata-rata | p95 | Error | SLA breach |
+|---|---|---|---|---|---|---|
+| 100 | CSR-React | 82 req/s | 22 ms | 46 ms | 0% | 0% |
+| 100 | CSR-Next | 83 req/s | 10 ms | 15 ms | 0% | 0% |
+| 100 | SSG-Next | 83 req/s | 14 ms | 20 ms | 0% | 0% |
+| 100 | SSR-Next | 74 req/s | 138 ms | 272 ms | 0% | 0% |
+| 500 | CSR-React | 391 req/s | 78 ms | 221 ms | 0% | 0% |
+| 500 | CSR-Next | 410 req/s | 25 ms | 83 ms | 0% | 0% |
+| 500 | SSG-Next ⚠️ | 217 req/s | 944 ms | 1.153 ms | 0% | 0,2% |
+| 500 | SSR-Next | 75 req/s | 4.718 ms | 5.940 ms | 0% | 85,2% |
+| 1000 | CSR-React | 612 req/s | 375 ms | 700 ms | 0% | 0% |
+| 1000 | CSR-Next | 544 req/s | 553 ms | 804 ms | 0% | 0% |
+| 1000 | SSG-Next ⚠️ | 216 req/s | 2.567 ms | 8.803 ms | 0% | 13,5% |
+| 1000 | SSR-Next | 75 req/s | 9.482 ms | 25.636 ms | 0,24% | 93,9% |
 
-✍️ **TULIS SENDIRI.** Urutan waktu respons mengikuti beban komputasi server: penyajian berkas statis paling ringan, diikuti HTML pra-render, dan paling berat rendering ulang setiap request. SSR mencatat waktu respons **3,9 kali** lebih lama dibanding CSR. Inilah trade-off yang menjadi inti RQ3.
+⚠️ = terbatas jaringan (lihat 3.8.2 butir 1); bukan kapasitas server.
 
-Pengujian pada tingkat beban yang lebih tinggi tidak dapat dilakukan secara sah karena keterbatasan yang diuraikan pada 3.8.
+### 4.6.2 Pemantauan server (fase stabil)
+
+CPU proses Node tersibuk dinyatakan dalam persen **satu inti** (100 = satu inti penuh); CPU total dari empat inti.
+
+| Pengujian | CPU total | Node tersibuk | Trafik keluar |
+|---|---|---|---|
+| SSR 100 VU | 42% | 108% | 36 Mbps |
+| SSR 500 VU | 45% | 113% | 31 Mbps |
+| SSR 1000 VU | 44% | 114% | 30 Mbps |
+| CSR-React 500 VU | 45% | 99% | 3 Mbps |
+| CSR-React 1000 VU | 52% | 119% | 5 Mbps |
+| CSR-Next 1000 VU | 44% | 103% | 41 Mbps |
+| SSG 500 VU | 32% | 55% | **96 Mbps** |
+| SSG 1000 VU | 32% | 56% | **95 Mbps** |
+
+Fakta yang didukung data: (a) throughput SSR mendatar di sekitar 75 req/s pada 100, 500, dan 1000 pengguna virtual sementara proses Node-nya memakai sekitar satu inti penuh dan CPU total di bawah 50%; (b) CSR-React dan CSR-Next menjenuhkan satu inti pada 500-1000 pengguna virtual; (c) pada SSG, trafik keluar setara kapasitas kabel sementara Node belum jenuh; (d) RAM tidak menjadi pembatas (maksimum sekitar 5,6 GB dari 7,75 GB terpakai).
+
+### 4.6.3 Pembanding
+
+Pada 100 pengguna virtual, rata-rata waktu respons di Vercel: CSR-React 51 ms, CSR-Next 51 ms, SSG-Next 109 ms, SSR-Next 200 ms; di server lokal (kabel): 22, 10, 14, dan 138 ms. Urutan SSR paling lambat konsisten; selisih mutlaknya berbeda karena lingkungan berbeda (3.8.2 butir 5). Pengujian Wi-Fi 16 November 2026 menunjukkan pola yang sama.
+
+✍️ **TULIS SENDIRI.** Interpretasi: mengapa SSR dibatasi satu proses Node (rendering ulang dokumen pada setiap request dalam satu thread), mengapa CSR statis jauh lebih ringan, dan apa artinya bagi trade-off RQ3. Rasio SSR terhadap CSR sebelumnya 3,9× (Vercel); di server lokal pada 100 pengguna virtual sekitar 6× terhadap CSR-React dan 14× terhadap CSR-Next, jadi hitung ulang dan nyatakan lingkungan tiap angka.
 
 ## 4.7 RQ4 — Trade-off Sisi Klien dan Sisi Server
 
@@ -412,7 +465,7 @@ Temuan tambahan yang layak diangkat:
 
 ## 5.2 Keterbatasan Penelitian
 
-Salin dari `KETERBATASAN.md` — tiga belas butir, masing-masing disertai bukti.
+Salin dari `KETERBATASAN.md` — tujuh belas butir, masing-masing disertai bukti.
 
 ## 5.3 Saran
 

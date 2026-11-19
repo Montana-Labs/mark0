@@ -1,12 +1,14 @@
 # ⚠️ Keterbatasan Penelitian
 
-> **Diperbarui:** 2 November 2026
+> **Diperbarui:** 19 November 2026
 > **Kegunaan:** bahan langsung untuk subbab *Keterbatasan Penelitian* di Bab 3 dan Bab 5.
 > **Prinsip:** setiap keterbatasan disertai **bukti** dan **alasan mengapa tidak dapat dihindari**. Sebutkan sendiri sebelum penguji menemukannya.
 
 ---
 
-## 1. 🔴 Load testing terbatas pada 100 pengguna virtual
+## 1. ✅ Load testing di Vercel terbatas pada 100 pengguna virtual (diatasi dengan server lokal)
+
+> **Pembaruan 19 November 2026:** keterbatasan ini sudah diatasi dengan memindahkan pengujian ke server lokal (100/500/1000 VU; lihat butir 15-17 untuk keterbatasan yang tersisa). Bagian di bawah dipertahankan sebagai catatan alasan pindah.
 
 **Masalah.** Kolokium 8.2.1 menjanjikan pengujian pada 100, 500, dan 1000 pengguna virtual simultan. Yang berhasil diukur secara sah hanya **100 pengguna virtual**.
 
@@ -46,7 +48,7 @@ SSR **3,9× lebih berat** daripada CSR. Trade-off yang menjadi inti RQ3 terbukti
 
 **Catatan tambahan yang dapat diangkat sebagai temuan:** pada platform terkelola, batas praktis jumlah pengguna simultan ditentukan oleh ambang mitigasi platform, bukan oleh kapasitas komputasi aplikasi. Untuk konteks e-commerce, informasi ini relevan secara praktis.
 
-**Status:** terbuka. Dapat diatasi dengan plan berbayar atau VPS mandiri bila diperlukan.
+**Status:** ✅ diatasi (17 November 2026) dengan server lokal atas arahan Bu Nila (5 Nov) dan persetujuan Pak Dito (9 Nov). Data Vercel 100 VU tetap dipakai sebagai pembanding.
 
 ---
 
@@ -196,11 +198,51 @@ Untuk strategi CSR (yang menukar total DOM dari teks "Loading..." menjadi grid p
 
 ---
 
+## 15. 🔴 SSG pada 500 dan 1000 VU terbatas jaringan
+
+**Masalah.** Pada pengujian server lokal, hasil SSG pada 500 dan 1000 pengguna virtual tidak mencerminkan kapasitas server.
+
+**Bukti.**
+
+| Bukti | Nilai |
+|---|---|
+| Trafik keluar server (kabel) | 96 Mbps (500 VU), 95 Mbps (1000 VU) |
+| Kapasitas kabel terukur (iperf3) | ~93 Mbps kedua arah (adaptor USB 100 Mbps) |
+| CPU proses Node | ~55% dari satu inti; CPU total 32% |
+| Ukuran dokumen | ~49 KB; 216 req/s x 49 KB = ~85 Mbps |
+| Pengujian Wi-Fi 5 GHz sebelumnya | Tx 73 Mbps rata-rata (maks 85) = kapasitas Wi-Fi ~75-80 Mbps; CPU 18% |
+
+**Mengapa tidak diatasi.** Adaptor Ethernet yang tersedia hanya 100 Mbps. Adaptor gigabit (dan port router gigabit) akan menghilangkan batas ini; belum dibeli.
+
+**Yang tetap dapat disimpulkan.** Pada 100 VU semua strategi valid; pada 500/1000 VU, SSR dan kedua CSR valid sebagai data server.
+
+**Status:** terbuka. Opsional diulang untuk SSG saja dengan adaptor gigabit.
+
+---
+
+## 16. Satu mesin, satu proses Node per layanan, satu kali jalan per sel
+
+**Masalah.** Server uji berkemampuan rendah (Pentium Silver N6000, 4 inti, 7,75 GB) dan setiap layanan berjalan sebagai satu proses Node tanpa cluster/PM2. Pemantauan menunjukkan proses SSR dan CSR menjenuhkan satu inti (~99-119%) sementara CPU total di bawah 52%. Setiap sel hanya dijalankan satu kali per pengujian jaringan.
+
+**Dampak.** Angka absolut (misalnya throughput SSR ~75 req/s) khas untuk konfigurasi ini; produksi dengan banyak proses/inti akan berbeda. Variasi antar ulangan belum terukur.
+
+**Status:** ✅ dinyatakan sebagai batasan; ulangan opsional bila waktu cukup.
+
+---
+
+## 17. k6 hanya mengunduh HTML dan hanya pada tier light
+
+**Masalah.** Pengujian beban hanya mengunduh dokumen HTML, bukan gambar atau video, dan hanya pada satu tier media. Pengaruh variasi media pada sisi klien diukur terpisah dengan Lighthouse (lihat butir 2).
+
+**Status:** ✅ disengaja; dijelaskan di 3.7.
+
+---
+
 # Ringkasan status
 
 | # | Keterbatasan | Status |
 |---|---|---|
-| 1 | Load testing terbatas 100 VU | 🔴 terbuka |
+| 1 | Load testing Vercel terbatas 100 VU | ✅ diatasi (server lokal) |
 | 2 | RQ3 tidak mencakup variasi media | ✅ disengaja |
 | 3 | Istilah Core Web Vitals | 🟡 perbaiki dokumen |
 | 4 | Lab data, bukan field data | ✅ dinyatakan |
@@ -214,7 +256,10 @@ Untuk strategi CSR (yang menukar total DOM dari teks "Loading..." menjadi grid p
 | 12 | Pilot study tidak sebanding | ✅ dilabeli ulang |
 | 13 | SonarQube SAST bukan SCA | 🟡 perbaiki saat menulis |
 | 14 | Lighthouse throttling simulate -> LCP tidak valid | ✅ ditemukan & diperbaiki |
+| 15 | SSG 500/1000 VU terbatas jaringan | 🔴 terbuka (opsional adaptor gigabit) |
+| 16 | Satu mesin, satu proses Node, satu kali jalan | ✅ dinyatakan |
+| 17 | k6 hanya HTML dan tier light | ✅ disengaja |
 
 ---
 
-**Terakhir diperbarui:** 2 November 2026
+**Terakhir diperbarui:** 19 November 2026
