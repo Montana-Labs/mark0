@@ -40,7 +40,7 @@
 | SSG-Next | 109 ms |
 | SSR-Next | **200 ms** |
 
-SSR **3,9× lebih berat** daripada CSR. Trade-off yang menjadi inti RQ3 terbukti.
+SSR **3,9× lebih lambat** daripada CSR (200 ms berbanding 51 ms; angka ini khusus Vercel pada 100 pengguna virtual). Angka utama RQ3 memakai server lokal (lihat 4.6); angka Vercel hanya pembanding.
 
 **Rumusan untuk Bab 3:**
 

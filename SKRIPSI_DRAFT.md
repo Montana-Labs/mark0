@@ -429,7 +429,7 @@ Fakta yang didukung data: (a) throughput SSR mendatar di sekitar 75 req/s pada 1
 
 Pada 100 pengguna virtual, rata-rata waktu respons di Vercel: CSR-React 51 ms, CSR-Next 51 ms, SSG-Next 109 ms, SSR-Next 200 ms; di server lokal (kabel): 22, 10, 14, dan 138 ms. Urutan SSR paling lambat konsisten; selisih mutlaknya berbeda karena lingkungan berbeda (3.8.2 butir 5). Pengujian Wi-Fi 16 November 2026 menunjukkan pola yang sama.
 
-✍️ **TULIS SENDIRI.** Interpretasi: mengapa SSR dibatasi satu proses Node (rendering ulang dokumen pada setiap request dalam satu thread), mengapa CSR statis jauh lebih ringan, dan apa artinya bagi trade-off RQ3. Rasio SSR terhadap CSR sebelumnya 3,9× (Vercel); di server lokal pada 100 pengguna virtual sekitar 6× terhadap CSR-React dan 14× terhadap CSR-Next, jadi hitung ulang dan nyatakan lingkungan tiap angka.
+✍️ **TULIS SENDIRI.** Interpretasi: mengapa SSR dibatasi satu proses Node (rendering ulang dokumen pada setiap request dalam satu thread), mengapa CSR statis jauh lebih ringan, dan apa artinya bagi trade-off RQ3. Rasio waktu respons SSR terhadap CSR (server lokal, kabel): pada 100 pengguna virtual 6,3× terhadap CSR-React dan 13,8× terhadap CSR-Next. Rasio ini membesar pada 500 dan 1000 pengguna virtual karena SSR jenuh (antrean), jadi lebih jujur dilaporkan sebagai rasio kapasitas: throughput SSR mendatar di sekitar 75 req/s, sedangkan CSR mencapai 391-410 req/s pada 500 pengguna virtual (5,2-5,5×) dan 544-612 req/s pada 1000 pengguna virtual (7,3-8,2×). Angka Vercel 3,9× (200 ms berbanding 51 ms) hanya pembanding pada 100 pengguna virtual. Nyatakan lingkungan pada setiap angka.
 
 ## 4.7 RQ4 — Trade-off Sisi Klien dan Sisi Server
 
@@ -437,7 +437,7 @@ Pada 100 pengguna virtual, rata-rata waktu respons di Vercel: CSR-React 51 ms, C
 
 | Dimensi | Temuan |
 |---|---|
-| Beban server | SSR 3,9× lebih berat daripada CSR |
+| Beban server | Server lokal: SSR jenuh di ~75 req/s, CSR 5,2-8,2× lebih tinggi pada 500-1000 VU; waktu respons 6,3-13,8× pada 100 VU (Vercel 100 VU: 3,9×) |
 | Kecepatan tampil awal | seluruh varian Next.js unggul FCP — tetapi ini efek framework, bukan strategi |
 | Responsivitas | CSR-React TBT nol; seluruh varian Next.js 54–77 ms |
 | LCP pada beban berat | perbedaan antar strategi hilang (p = 0,745) |
@@ -455,7 +455,7 @@ Susun rekomendasi berbasis kondisi, bukan pemenang tunggal. Contoh arah: kapan C
 
 1. **RQ1** — perbandingan performa antar strategi rendering berdasarkan Core Web Vitals
 2. **RQ2** — pengaruh variasi beban media (temuan utama, ε² ≈ 0,87)
-3. **RQ3** — perbandingan beban server (SSR 3,9× lebih berat, dengan keterbatasan 3.8)
+3. **RQ3** — perbandingan beban server (server lokal: SSR jenuh di sekitar 75 req/s dan 6,3-13,8× lebih lambat pada 100 VU; Vercel 3,9× hanya pembanding; dengan keterbatasan 3.8)
 4. **RQ4** — trade-off sisi klien dan sisi server
 
 Temuan tambahan yang layak diangkat:
