@@ -1,0 +1,15 @@
+{
+  "label": "csrnext_light_500vu",
+  "url": "http://192.168.18.92:3000/csr",
+  "vus": 500,
+  "total_requests": 26788,
+  "throughput_rps": 406.17871393369023,
+  "duration_avg_ms": 35.193992048678716,
+  "duration_med_ms": 11.4555,
+  "duration_p95_ms": 51.20209999999996,
+  "duration_p99_ms": 794.2477799999999,
+  "duration_max_ms": 2182.249,
+  "http_error_rate": 0,
+  "sla_breach_rate": 0,
+  "data_received_bytes": 218402564
+}
