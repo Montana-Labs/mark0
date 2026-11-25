@@ -1,0 +1,38 @@
+=== Spesifikasi server load testing kedua (laptop HP Core i5) ===
+Dicatat: 2026-11-25, dari laporan pengguna (Settings/About di mesin i5)
+Data pengujian: results/k6-i5/ (Defender mati) dan results/k6-i5-defender-on/
+
+Sistem operasi
+  Windows (laptop HP)
+
+Prosesor
+  Name : Intel(R) Core(TM) i5-8250U CPU @ 1.60GHz
+  (Spesifikasi pabrikan Intel: 4 core / 8 thread, turbo hingga 3,4 GHz)
+
+Memori
+  RAM (GB): 8
+
+Kartu grafis
+  AMD Radeon R7 M440, 2 GB (tidak berperan dalam pengujian beban HTTP)
+
+Penyimpanan
+  238 GB
+
+Jaringan
+  Ethernet kabel LAN 1 Gbps ke router rumah (nama jaringan disamarkan)
+  IPv4: 192.168.18.92/24 (reservasi DHCP statis di router)
+
+Perangkat lunak
+  node : v26.12.1
+  pnpm : 11.1.2
+  Repo : C:\Skripsi\mark0 (commit 32c8983)
+
+Kondisi saat pengujian
+  - Dataset utama: Windows Defender dan Tamper Protection DIMATIKAN sementara
+    (2026-11-25 02.04-02.27 WIB).
+  - Pembanding: Defender MENYALA (2026-11-25 00.38-01.01 WIB).
+  - Setelah pengujian Defender dinyalakan kembali.
+
+Catatan
+  - Klien pengujian: Mac (Apple M1), k6, lewat Wi-Fi ke router yang sama.
+    Pada SSG 500/1000 VU hambatan ada di jalur klien (Wi-Fi/k6), bukan server.
