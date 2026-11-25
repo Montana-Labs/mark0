@@ -136,7 +136,7 @@ Kolom penting di CSV:
 
 ### 4.1 Layar terminal (dari `handleSummary`)
 
-Contoh nyata (demo 26 Nov, 5 VU ke Vercel):
+Contoh nyata (uji coba 26 Nov, 5 VU; format layar sama untuk semua uji):
 
 ```
   demo_ssr_5vu  @ 5 VU
@@ -200,39 +200,79 @@ jadi hambatannya di luar server (jalur klien). Karena itu tidak dipakai sebagai 
 
 ---
 
-## 5. Skenario demo langsung (±10 menit)
+## 5. Skenario demo langsung (±10 menit) — ke server i5, bukan Vercel
 
-Server i5 sudah dikembalikan ke kondisi aman (firewall ditutup), jadi demo langsung paling aman memakai **target Vercel dengan
-beban kecil**, lalu memperlihatkan data asli dari server lokal.
+Demo memakai **lingkungan yang sama dengan data penelitian**: laptop i5 sebagai server, Mac sebagai klien k6, satu jaringan.
+Beban dikecilkan (50 VU, 15 detik) supaya cepat; angka demo tidak menggantikan data penelitian.
 
-**Langkah 1. Tunjukkan skrip (2 menit).** Buka `load-testing/k6-cell.js`, tunjuk 4 hal: `stages`, `sleep(1)`, dua metrik
+### 5.0 Persiapan di laptop i5 (sebelum dosen datang)
+
+Mac dan laptop i5 harus di **jaringan yang sama**. Di PowerShell **Administrator**:
+
+```powershell
+cd C:\Skripsi\mark0
+git pull
+powershell -ExecutionPolicy Bypass -File .\scripts\moona\buka-firewall.ps1
+```
+
+Lalu di PowerShell biasa:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\moona\mulai-tes.ps1 -Ip 192.168.18.92
+```
+
+Muncul 4 jendela: middleware, Next.js, React, dan monitoring. Biarkan monitoring berjalan.
+
+**Kalau demo di kampus (bukan di rumah):** IP i5 pasti berubah, dan IP tertanam di hasil build. Cek IP baru dengan `ipconfig`,
+lalu build ulang dulu (beberapa menit, lakukan jauh sebelum bimbingan):
+
+```powershell
+cd api-middleware; pnpm build; cd ..
+powershell -ExecutionPolicy Bypass -File .\scripts\moona\bangun-ulang.ps1 -Ip <IP_BARU>
+powershell -ExecutionPolicy Bypass -File .\scripts\moona\mulai-tes.ps1 -Ip <IP_BARU>
+```
+
+Jaringan kampus sering memblokir koneksi antar-perangkat; kalau `curl` dari Mac gagal, pakai hotspot HP untuk kedua laptop
+(IP berubah lagi, ulangi build). Cadangan terakhir: rekam video demo di rumah dan tunjukkan data asli (langkah 4).
+
+### 5.1 Langkah demo di Mac
+
+**Langkah 1. Cek server (30 detik).** Dari folder repo:
+
+```bash
+HOST=192.168.18.92 CHECK_ONLY=1 scripts/run-k6-lokal.sh
+```
+
+Keempat target harus `200`. Jelaskan: "Skrip menolak jalan kalau ada target mati, supaya tidak ada data sampah."
+
+**Langkah 2. Tunjukkan skrip (2 menit).** Buka `load-testing/k6-cell.js`, tunjuk 4 hal: `stages`, `sleep(1)`, dua metrik
 `http_errors`/`sla_breaches`, dan `SLA_MS = 3000`.
 
-**Langkah 2. Jalankan uji mini (1 menit).** Dari folder repo:
+**Langkah 3. Uji mini SSR lalu CSR (3 menit).**
 
 ```bash
 cd load-testing
-VUS=5 HOLD=10s TARGET_URL=https://mark0-next-light.vercel.app/ssr LABEL=demo_ssr OUT_DIR=/tmp k6 run --quiet k6-cell.js
+VUS=50 HOLD=15s TARGET_URL=http://192.168.18.92:3000/ssr LABEL=demo_ssr OUT_DIR=/tmp k6 run --quiet k6-cell.js
+VUS=50 HOLD=15s TARGET_URL=http://192.168.18.92:5000/ LABEL=demo_csr OUT_DIR=/tmp k6 run --quiet k6-cell.js
 ```
 
-Sambil menunggu, jelaskan: "Lima VU, naik 15 detik, stabil 10 detik, turun 5 detik."
-Kalau ingin memperlihatkan ringkasan bawaan k6 yang lengkap (http_req_duration, iterations, data_received), hapus `--quiet`.
-
-**Langkah 3. Bandingkan dengan CSR (1 menit).**
-
-```bash
-VUS=5 HOLD=10s TARGET_URL=https://mark0-react-light.vercel.app/ LABEL=demo_csr OUT_DIR=/tmp k6 run --quiet k6-cell.js
-```
-
-Tunjukkan bahwa CSR lebih cepat karena server hanya mengirim berkas statis.
+Selama uji berjalan, ajak dosen melihat **jendela monitoring di i5**: kolom `node_top_core_pct` naik saat SSR (port 3000),
+jauh lebih kecil saat CSR (port 5000). Itu bukti langsung "SSR membebani CPU server, CSR tidak".
+Untuk ringkasan bawaan k6 yang lengkap, hapus `--quiet`.
 
 **Langkah 4. Buka data asli (3 menit).** `results/k6-i5/ssr_light_1000vu.json` lalu `results/k6-i5/run-log.csv`
-(tunjuk kode 99). Lalu buka `results/monitor-i5/monitor-20261125-020139.csv` dan cari baris dengan epoch antara
-`mulai_epoch` dan `selesai_epoch` SSR 1000 VU (1795548369-1795548437), tunjuk kolom `node_top_core_pct` ~176.
+(tunjuk kode 99). Lalu `results/monitor-i5/monitor-20261125-020139.csv`, cari baris dengan epoch antara
+1795548369 dan 1795548437 (SSR 1000 VU), tunjuk `node_top_core_pct` ~176.
 
 **Langkah 5. Tarik kesimpulan (2 menit).** Pakai tabel 4.2 di `UPDATE_BIMBINGAN_4.md`: CSR 4,7-5,2x kapasitas SSR pada 1000 VU.
 
-Catatan jujur saat demo: angka demo Vercel bergantung internet, jadi **bukan data penelitian**, hanya memperlihatkan cara kerja.
+### 5.2 Setelah demo
+
+Ctrl+C di jendela server dan monitoring, lalu di PowerShell Administrator:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\moona\tutup-firewall.ps1
+```
 
 ---
 
@@ -307,7 +347,8 @@ saya catat sebagai keterbatasan." Jangan mengarang angka.
 
 ## 8. Checklist sebelum bimbingan
 
-- [ ] `k6 version` jalan di Mac; koneksi internet ada (untuk demo Vercel)
+- [ ] `k6 version` jalan di Mac; Mac dan i5 satu jaringan; `CHECK_ONLY=1` semua 200
+- [ ] Firewall i5 dibuka (`buka-firewall.ps1`) dan ditutup lagi setelah demo
 - [ ] Laptop dicas; buka tab: `k6-cell.js`, `run-k6-lokal.sh`, `results/k6-i5/`, `results/monitor-i5/`, `UPDATE_BIMBINGAN_4.md`
 - [ ] Hafal tiga angka: SSR jenuh ~157 req/s (i5) / ~75 req/s (Pentium); CSR 742-812 req/s pada 1000 VU; SSR 1000 VU SLA breach 70,58%
 - [ ] Hafal hitungan 5.500 iterasi (bagian 3.3)
