@@ -258,7 +258,7 @@ VUS=50 HOLD=15s TARGET_URL=http://192.168.18.92:5000/ LABEL=demo_csr OUT_DIR=/tm
 
 Selama uji berjalan, ajak dosen melihat **jendela monitoring di i5**: kolom `node_top_core_pct` naik saat SSR (port 3000),
 jauh lebih kecil saat CSR (port 5000). Itu bukti langsung "SSR membebani CPU server, CSR tidak".
-Untuk ringkasan bawaan k6 yang lengkap, hapus `--quiet`.
+`--quiet` hanya menyembunyikan bilah progres; ringkasan bawaan k6 sudah diganti oleh `handleSummary` di skrip.
 
 **Langkah 4. Buka data asli (3 menit).** `results/k6-i5/ssr_light_1000vu.json` lalu `results/k6-i5/run-log.csv`
 (tunjuk kode 99). Lalu `results/monitor-i5/monitor-20261125-020139.csv`, cari baris dengan epoch antara
