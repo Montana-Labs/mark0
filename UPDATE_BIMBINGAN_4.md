@@ -172,10 +172,11 @@ Bapak: buka daftar pustaka paper acuan, lalu kutip jurnal aslinya.
 
 1. Belum ada jurnal yang **menamai** "SLA breach rate" sebagai metrik baku. Saya merumuskannya sebagai proporsi permintaan
    yang melampaui ambang waktu tunggu pengguna (turunan Yuwono, Nah, Galletta).
-2. Semua jurnal acuan memakai **JMeter**, saya memakai **k6**. Alatnya berbeda, metriknya sama; ditulis begitu di Bab 2.
-   Belum ada jurnal k6 terverifikasi yang saya kutip.
+2. Sebagian besar jurnal acuan memakai **JMeter**, saya memakai **k6**. Alatnya berbeda, metriknya sama; ditulis begitu di Bab 2.
+   Rujukan yang memakai k6: **Danutirta dkk. (2026)**, Simtek 11(2), 410-419 (sudah di naskah, untuk metrik waktu respons dan throughput).
 3. Oktafianto dkk. (2025) dan Gunasekaran & Kannan (2012) belum bisa dibuka, jadi **tidak dikutip**.
-4. Tiga sumber masih non-jurnal di daftar pustaka (APJII, Google web.dev, satu skripsi) dan akan diganti atau dihapus.
+4. Tiga sumber masih non-jurnal di daftar pustaka (APJII, Google web.dev, satu skripsi). Untuk sementara dipertahankan,
+   menunggu pendapat Bapak.
 
 ---
 
@@ -199,9 +200,10 @@ Bapak: buka daftar pustaka paper acuan, lalu kutip jurnal aslinya.
 
 ## 7. Rencana berikutnya
 
-1. Tulis `results/ringkasan-k6-i5.md` dan ganti angka Bab 4 di naskah dengan data i5 (sekarang masih campuran Pentium kabel).
+1. ~~Masukkan data i5 ke naskah~~ (selesai 26 Nov: bagian 4.6, Tabel 4.14-4.16, ditandai hijau). Sisa: tulis
+   `results/ringkasan-k6-i5.md` dan pembahasan Bab 4 yang membandingkan dengan penelitian terdahulu.
 2. Perbarui `KETERBATASAN.md` butir 15-16 dengan temuan i5 (jalur klien, Defender).
-3. Ganti tiga sumber non-jurnal.
+3. Putuskan tiga sumber non-jurnal setelah bimbingan.
 4. Tulis Bab 5.
 5. Slide sidang ±15 menit + slide cadangan (rumus, tabel lengkap, kutipan rujukan).
 6. Target pendaftaran pendadaran: **Desember 2026**.

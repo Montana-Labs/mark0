@@ -314,7 +314,7 @@ Kalimat demo:
 
 | Pertanyaan | Jawaban singkat |
 |---|---|
-| Kenapa k6, bukan JMeter seperti jurnal acuan? | Metrik yang diukur sama (response time, throughput, error). k6 berbasis skrip JavaScript sehingga skenario tersimpan di repo dan bisa diulang persis; ringan di Mac klien. |
+| Kenapa k6, bukan JMeter seperti jurnal acuan? | k6 juga dipakai dalam penelitian pengujian performa (Danutirta dkk., 2026). Metrik yang diukur sama dengan jurnal JMeter (response time, throughput, error). k6 berbasis skrip JavaScript sehingga skenario tersimpan di repo dan bisa diulang persis; ringan di Mac klien. |
 | Kenapa ada `sleep(1)`? | Meniru jeda pengguna. Tanpa itu, 100 VU akan menembak secepat mungkin dan yang diuji bukan lagi "100 pengguna". Konsekuensinya 100 VU ≈ 83 req/s (hitungan 3.3). |
 | Kenapa hanya HTML, tidak mengunduh gambar? | Yang ingin diukur biaya server membuat dokumen per strategi. Gambar disajikan sama untuk semua kondisi; pengaruhnya diukur di Lighthouse. Dicatat di KETERBATASAN butir 17. |
 | Kenapa hanya tier light di k6? | Karena HTML-nya hampir sama antartier (yang berbeda berkas medianya, yang tidak diunduh k6). |
